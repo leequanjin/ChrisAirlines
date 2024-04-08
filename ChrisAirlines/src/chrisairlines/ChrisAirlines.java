@@ -3,6 +3,8 @@ package chrisairlines;
 public class ChrisAirlines {
 
   public static void main(String[] args) {
+    FileManagement.createFile();
+    FileManagement.readMembersFromFile();
     Membership newMember = MembershipCreation.createMembership();
 
     if (newMember != null) {
@@ -18,5 +20,9 @@ public class ChrisAirlines {
     System.out.println("Your Membership Level : " + newMember.getMembership_level());
     System.out.println("Your Points Accumulated : " + newMember.getPoints_accumulated());
     System.out.println("Your Membership Status : " + newMember.getMembership_status());
+    
+    
+    FileManagement.writeToFile(newMember);
+    
   }
 }
