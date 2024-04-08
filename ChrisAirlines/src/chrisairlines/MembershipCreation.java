@@ -12,9 +12,9 @@ public class MembershipCreation {
     System.out.print("Enter Member Name : ");
     String name = scan.nextLine();
     System.out.print("Enter Contact Info (Phone) : ");
-    String contact = scan.next();
+    String contact = scan.nextLine();
     System.out.print("Enter Password : ");
-    String password = scan.next();
+    String password = scan.nextLine();
     String re_password;
 
     do {
