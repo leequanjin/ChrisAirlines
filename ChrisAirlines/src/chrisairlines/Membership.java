@@ -11,7 +11,16 @@ public class Membership {
   private MembershipStatus membership_status; // enum for Active, Inactive etc.
   private String password; // hashed password for secure storage
 
-
+    public Membership(int membership_id, String member_name, String contact_info, MembershipLevel membership_level, int points_accumulated, MembershipStatus membership_status, String password) {
+        this.membership_id = membership_id;
+        this.member_name = member_name;
+        this.contact_info = contact_info;
+        this.membership_level = membership_level;
+        this.points_accumulated = points_accumulated;
+        this.membership_status = membership_status;
+        this.password = password;
+    }
+  
   public Membership(String member_name, String contact_info, String password) {
     this.membership_id = membership_id_count;
     this.member_name = member_name;
@@ -50,7 +59,15 @@ public class Membership {
     public String getPassword() {
         return password;
     }
+    
+    public static int getMembershipIdCount() {
+        return membership_id_count;
+    }
 
+    public static void setMembership_id_count(int membership_id_count) {
+        Membership.membership_id_count = membership_id_count;
+    }
+    
     @Override
     public String toString() {
         return "Membership{" + "membership_id=" + membership_id + ", member_name=" + member_name + ", contact_info=" + contact_info + ", membership_level=" + membership_level + ", points_accumulated=" + points_accumulated + ", membership_status=" + membership_status + ", password=" + password + '}';
