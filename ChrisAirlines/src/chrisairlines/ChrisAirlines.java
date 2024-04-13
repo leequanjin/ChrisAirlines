@@ -1,29 +1,28 @@
 package chrisairlines;
 
-import chrisairlines.Customer;
-import java.util.Scanner;
-
 public class ChrisAirlines {
-    public static void main(String[] args) {
-        Scanner scan = new Scanner(System.in);
-        int choice;
-        boolean validChoice = false;
-        
-        while (!validChoice) {
-            System.out.println("You wanna login or signup? \n1. Login \n2. Signup");
-            choice = scan.nextInt();
 
-            switch (choice) {
-                case 1 -> {
-                    Customer.login();
-                    validChoice = true;
-                }
-                case 2 -> {
-                    Customer.signUp();
-                    validChoice = true;
-                }
-                default -> System.out.println("Invalid choice. Please enter 1 for login or 2 for signup.");
-            }
-        }
+  public static void main(String[] args) {
+    FileManagement.createFile();
+    FileManagement.readMembersFromFile();
+    Membership newMember = MembershipCreation.createMembership();
+
+    if (newMember != null) {
+      System.out.println("New member created successfully!");
+      // You can now access and potentially save the newMember object
+    } else {
+      System.out.println("Failed to create new membership.");
     }
+    
+    System.out.println("\nYour UID: " + newMember.getMembership_id());
+    System.out.println("Your Name : " + newMember.getMember_name());
+    System.out.println("Your Contact Info (Phone) : " + newMember.getContact_info());
+    System.out.println("Your Membership Level : " + newMember.getMembership_level());
+    System.out.println("Your Points Accumulated : " + newMember.getPoints_accumulated());
+    System.out.println("Your Membership Status : " + newMember.getMembership_status());
+    
+    
+    FileManagement.writeToFile(newMember);
+    
+  }
 }
