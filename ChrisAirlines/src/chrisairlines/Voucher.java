@@ -4,13 +4,14 @@ public class Voucher {
     private String code;
     private String description;
     private int pointsRequired;
+    
 
     public Voucher(String code, String description, int pointsRequired) {
         this.code = code;
         this.description = description;
         this.pointsRequired = pointsRequired;
     }
-
+    
     public String getCode() {
         return code;
     }
@@ -33,7 +34,5 @@ public class Voucher {
 
     public void setPointsRequired(int pointsRequired) {
         this.pointsRequired = pointsRequired;
-    }
-    
-    
+    } 
 }
