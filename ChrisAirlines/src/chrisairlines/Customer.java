@@ -164,14 +164,14 @@ public class Customer {
         redeemedVouchers.add(new VoucherDetails(voucher, redeemedDateTime));
     }
     
-    public void earnMileagePoints(double spentAmount) {
+    public void earnMileagePoints(double totalAmount) {
         double bonusPercentage = PointCalculation.getBonusPercentage(loyaltyTier);
-        int pointsEarned = PointCalculation.calculateMileagePoints(spentAmount, bonusPercentage);
+        int pointsEarned = PointCalculation.calculateMileagePoints(totalAmount, bonusPercentage);
         this.mileagePoints += pointsEarned;
     }
 
-    public void earnLoyaltyPoints(double spentAmount) {
-        int pointsEarned = PointCalculation.calculateLoyaltyPoints(spentAmount);
+    public void earnLoyaltyPoints(double totalAmount) {
+        int pointsEarned = PointCalculation.calculateLoyaltyPoints(totalAmount);
         this.loyaltyPoints += pointsEarned;
         updateLoyaltyTier();
     }

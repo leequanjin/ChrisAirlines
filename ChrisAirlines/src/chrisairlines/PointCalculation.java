@@ -1,8 +1,8 @@
 package chrisairlines;
 
 public class PointCalculation {
-    public static int calculateMileagePoints(double spentAmount, double bonusPercentage) {
-        return (int) (spentAmount * bonusPercentage);
+    public static int calculateMileagePoints(double totalAmount, double bonusPercentage) {
+        return (int) (totalAmount * bonusPercentage);
     }
 
     public static double getBonusPercentage(String loyaltyTier) {
@@ -16,7 +16,7 @@ public class PointCalculation {
         return 1.0 + baseBonus;
     }
 
-    public static int calculateLoyaltyPoints(double spentAmount) {
-        return (int) spentAmount;
+    public static int calculateLoyaltyPoints(double totalAmount) {
+        return (int) totalAmount;
     }
 }
