@@ -30,10 +30,6 @@ public class VoucherCatalog {
         vouchers.remove(code);
     }
     
-    public boolean hasVoucher(String code) {
-        return vouchers.containsKey(code);
-    }
-    
     public Map<String, Voucher> getAllVouchers() {
         return vouchers;
     }
