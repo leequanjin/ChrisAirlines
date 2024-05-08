@@ -16,6 +16,10 @@ public class Customer {
     private ArrayList<BookingDetails> bookedFlights;
     
 
+    public Customer(){
+    
+    }
+    
     public Customer(String id, String name, String email, String phone) {
         this.id = id;
         this.name = name;
@@ -106,47 +110,48 @@ public class Customer {
     public void setBookedFlights(List<BookingDetails> bookedFlights) {
         this.bookedFlights = (ArrayList<BookingDetails>) bookedFlights;
     }
+    
     // </editor-fold>
     
-    public BookingDetails bookFlight(Flight flight, int quantity, LocalDateTime bookingDateTime) {
+    public BookingDetails bookFlight(String customerId, Flight flight, int quantity, LocalDateTime bookingDateTime) {
         double discount = 0;
         double totalAmount = flight.getFare() * quantity - discount;
         earnMileagePoints(totalAmount);
         earnLoyaltyPoints(totalAmount);
-        BookingDetails bookingDetails = new BookingDetails(flight, quantity, totalAmount, bookingDateTime);
-        bookedFlights.add(bookingDetails);
+        BookingDetails bookingDetails = new BookingDetails(flight, quantity, totalAmount, bookingDateTime, 0, "-");
+        DatabaseHandler.saveBookingDetailToFile(customerId, bookingDetails);
         return bookingDetails;
     }
     
-    public BookingDetails bookFlightWithDiscountAmount(Flight flight, int quantity, LocalDateTime bookingDateTime, double discountAmount) {
+    public BookingDetails bookFlightWithDiscountAmount(String customerId, Flight flight, int quantity, LocalDateTime bookingDateTime, double discountAmount) {
         double discount = discountAmount;
         double totalAmount = flight.getFare() * quantity - discount;
         earnMileagePoints(totalAmount);
         earnLoyaltyPoints(totalAmount);
-        BookingDetails bookingDetails = new BookingDetails(flight, quantity, totalAmount, bookingDateTime, discount);
-        bookedFlights.add(bookingDetails);
+        BookingDetails bookingDetails = new BookingDetails(flight, quantity, totalAmount, bookingDateTime, discount, "-");
+        DatabaseHandler.saveBookingDetailToFile(customerId, bookingDetails);
         return bookingDetails;
     }
 
-    public BookingDetails bookFlightWithDiscountRate(Flight flight, int quantity, LocalDateTime bookingDateTime, double discountRate) {
+    public BookingDetails bookFlightWithDiscountRate(String customerId, Flight flight, int quantity, LocalDateTime bookingDateTime, double discountRate) {
         double subTotal = flight.getFare() * quantity;
         double discount = subTotal * (discountRate);
         double totalAmount = subTotal - discount;
         earnMileagePoints(totalAmount);
         earnLoyaltyPoints(totalAmount);
-        BookingDetails bookingDetails = new BookingDetails(flight, quantity, totalAmount, bookingDateTime, discount);
-        bookedFlights.add(bookingDetails);
+        BookingDetails bookingDetails = new BookingDetails(flight, quantity, totalAmount, bookingDateTime, discount, "-");
+        DatabaseHandler.saveBookingDetailToFile(customerId, bookingDetails);
         return bookingDetails;
     }
     
-    public BookingDetails bookFlightWithReward(Flight flight, int quantity, LocalDateTime bookingDateTime, String reward) {
+    public BookingDetails bookFlightWithReward(String customerId, Flight flight, int quantity, LocalDateTime bookingDateTime, String reward) {
         double subTotal = flight.getFare() * quantity;
         double discount = 0;
         double totalAmount = subTotal - discount;
         earnMileagePoints(totalAmount);
         earnLoyaltyPoints(totalAmount);
-        BookingDetails bookingDetails = new BookingDetails(flight, quantity, totalAmount, bookingDateTime, reward);
-        bookedFlights.add(bookingDetails);
+        BookingDetails bookingDetails = new BookingDetails(flight, quantity, totalAmount, bookingDateTime, 0, reward);
+        DatabaseHandler.saveBookingDetailToFile(customerId, bookingDetails);
         return bookingDetails;
     }
 
@@ -159,24 +164,49 @@ public class Customer {
         updateVoucherStatus();
     }
     
-    public void redeemVoucher(int requiredPoints, Voucher voucher, LocalDateTime redeemedDateTime) {
+    public void redeemVoucher(String id, int requiredPoints, Voucher voucher, LocalDateTime redeemedDateTime) {
         this.mileagePoints -= requiredPoints;
-        redeemedVouchers.add(new VoucherDetails(voucher, redeemedDateTime));
+        voucher.setStock(voucher.getStock() - 1);
+        
+        double discountAmount = 0.0;
+        double discountRate = 0.0;
+        String reward = "-";
+        
+        switch (voucher) {
+            case DiscountAmtVoucher discountAmtVoucher -> {
+                discountAmount = discountAmtVoucher.getDiscountAmount();
+            }
+            case DiscountRateVoucher discountRateVoucher -> {
+                discountRate = discountRateVoucher.getDiscountRate();
+            }
+            case RewardVoucher rewardVoucher -> {
+                reward = rewardVoucher.getReward();
+            }
+            default -> {
+            }
+        }
+        
+        VoucherDetails voucherDetails = new VoucherDetails(id, this.id, voucher, redeemedDateTime, discountAmount, discountRate, reward);
+        DatabaseHandler.updateCustomerInfo("customer_details.txt", this);
+        DatabaseHandler.saveRedeemedVoucherToFile(voucherDetails, "redeemed_vouchers.txt");
+        DatabaseHandler.updateVoucherDetails("voucher_details.txt", voucher);
     }
     
     public void earnMileagePoints(double totalAmount) {
         double bonusPercentage = PointCalculation.getBonusPercentage(loyaltyTier);
         int pointsEarned = PointCalculation.calculateMileagePoints(totalAmount, bonusPercentage);
         this.mileagePoints += pointsEarned;
+        DatabaseHandler.updateCustomerInfo("customer_details.txt", this);
     }
 
     public void earnLoyaltyPoints(double totalAmount) {
         int pointsEarned = PointCalculation.calculateLoyaltyPoints(totalAmount);
         this.loyaltyPoints += pointsEarned;
         updateLoyaltyTier();
+        DatabaseHandler.updateCustomerInfo("customer_details.txt", this);
     }
 
-    public void updateLoyaltyTier() {
+    private void updateLoyaltyTier() {
         if (loyaltyPoints < 10000) {
             this.loyaltyTier = "Bronze";
         } else if (loyaltyPoints < 50000) {
@@ -190,9 +220,17 @@ public class Customer {
     
     public void updateVoucherStatus() {
         for (VoucherDetails redeemedVoucher : redeemedVouchers) {
-                if ((redeemedVoucher.getExpiryDateTime().isBefore(LocalDateTime.now())) && (!redeemedVoucher.getStatus().equals("Used"))){
-                    redeemedVoucher.setStatus("Expired");
-                }
-            }  
-        }
+            if (redeemedVoucher.getStatus().equals("Used")){
+                break;
+            } else if(redeemedVoucher.getExpiryDateTime().isBefore(LocalDateTime.now())){
+                redeemedVoucher.setStatus("Expired");
+            } 
+            DatabaseHandler.updateRedeemedVouchers("redeemed_vouchers.txt", redeemedVoucher);
+        }  
+    }
+
+    @Override
+    public String toString() {
+        return id + "," + name + "," + email + "," + phone + "," + mileagePoints + "," + loyaltyPoints;
+    }
 }

@@ -10,30 +10,12 @@ public class BookingDetails {
     private double discount;
     private String reward;
 
-    public BookingDetails(Flight flight, int quantity, double totalAmount, LocalDateTime bookingDateTime) {
-        this.flight = flight;
-        this.quantity = quantity;
-        this.totalAmount = totalAmount;
-        this.bookingDateTime = bookingDateTime;
-        discount = 0;
-        reward = "-";
-    }
-    
-    public BookingDetails(Flight flight, int quantity, double totalAmount, LocalDateTime bookingDateTime, double discount) {
+    public BookingDetails(Flight flight, int quantity, double totalAmount, LocalDateTime bookingDateTime, double discount, String reward) {
         this.flight = flight;
         this.quantity = quantity;
         this.totalAmount = totalAmount;
         this.bookingDateTime = bookingDateTime;
         this.discount = discount;
-        reward = "-";
-    }
-    
-    public BookingDetails(Flight flight, int quantity, double totalAmount, LocalDateTime bookingDateTime, String reward) {
-        this.flight = flight;
-        this.quantity = quantity;
-        this.totalAmount = totalAmount;
-        this.bookingDateTime = bookingDateTime;
-        discount = 0;
         this.reward = reward;
     }
 
@@ -83,5 +65,10 @@ public class BookingDetails {
 
     public void setReward(String reward) {
         this.reward = reward;
+    }
+
+    @Override
+    public String toString() {
+        return flight.toString() + "," + quantity + "," + totalAmount + "," + bookingDateTime + "," + discount + "," + reward;
     }
 }

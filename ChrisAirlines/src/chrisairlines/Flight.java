@@ -67,5 +67,10 @@ class Flight {
     }
     // </editor-fold>
 
+    @Override
+    public String toString() {
+        return flightCode + "," + fare + "," + origin + "," + destination + "," + departureTime + "," + arrivalTime;
+    }
+
     
 }

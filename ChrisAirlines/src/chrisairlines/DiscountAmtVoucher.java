@@ -3,8 +3,17 @@ package chrisairlines;
 public class DiscountAmtVoucher extends Voucher {
     private double discountAmount;
     
-    public DiscountAmtVoucher(String code, String description, int pointsRequired, double discountAmount) {
-        super(code, description, pointsRequired);
+    public DiscountAmtVoucher() {
+
+    }
+    
+    public DiscountAmtVoucher(String code, String type, String description, double discountAmount) {
+        super(code, type, description);
+        this.discountAmount = discountAmount;
+    }
+    
+    public DiscountAmtVoucher(String code, String type, String description, int pointsRequired, int stock, double discountAmount) {
+        super(code, type, description, pointsRequired, stock);
         this.discountAmount = discountAmount;
     }
 
@@ -14,5 +23,10 @@ public class DiscountAmtVoucher extends Voucher {
 
     public void setDiscountAmount(double discountAmount) {
         this.discountAmount = discountAmount;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + "," + discountAmount;
     }
 }
