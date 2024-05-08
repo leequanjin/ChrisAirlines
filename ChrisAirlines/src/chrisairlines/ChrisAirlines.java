@@ -19,16 +19,19 @@ public class ChrisAirlines {
             selection = menu();
 
             switch (selection) {
+                // add customer
                 case 1-> {
                     Customer customer = enterCustomerDetails();
                     
                     DatabaseHandler.saveCustomerDetailsToFile(customer, "customer_details.txt");
                 }
+                // add voucher
                 case 2-> {
                     Voucher voucher = enterVoucherDetails();
                     
                     DatabaseHandler.saveVoucherDetailsToFile(voucher, "voucher_details.txt");
                 }
+                // book ticket
                 case 3 -> {
                     Customer selectedCustomer = promptCustomerID();
                     
@@ -124,6 +127,8 @@ public class ChrisAirlines {
                                     DatabaseHandler.updateRedeemedVouchers("redeemed_vouchers.txt", redeemedVoucher);
                                     
                                     break;
+                                } else {
+                                    System.out.println("Invalid voucher");
                                 }
                             }
                         } else {
@@ -141,6 +146,7 @@ public class ChrisAirlines {
                         System.out.println("Customer not found.");
                     }
                 }
+                // redeem voucher
                 case 4 -> {
                     Customer selectedCustomer = promptCustomerID();
 
@@ -169,7 +175,7 @@ public class ChrisAirlines {
                             }
                         }
 
-                        if (selectedVoucher != null && selectedCustomer.getMileagePoints() >= selectedVoucher.getPointsRequired()) {
+                        if (selectedVoucher != null && selectedCustomer.getMileagePoints() >= selectedVoucher.getPointsRequired() && selectedVoucher.getStock() >= 1) {
                             int newId = DatabaseHandler.generateNewId("redeemed_vouchers.txt");
                             String id = String.valueOf(newId);
                             LocalDateTime redemptionDateTime = LocalDateTime.now();
@@ -180,12 +186,13 @@ public class ChrisAirlines {
                             System.out.println("Voucher " + selectedVoucher.getCode() + " redeemed successfully for customer: " + selectedCustomer.getName());
                             System.out.println("Redemption Date: " + formattedRedemptionDateTime);
                         } else {
-                            System.out.println("Invalid voucher code or insufficient mileage points for redemption.");
+                            System.out.println("Invalid voucher code or insufficient mileage points for redemption or out of stock.");
                         }
                     } else {
                         System.out.println("Customer not found.");
                     }
                 }
+                // view profile
                 case 5 -> {
                     Customer selectedCustomer = promptCustomerID();
                     
@@ -218,6 +225,7 @@ public class ChrisAirlines {
                         System.out.println("Customer not found.");
                     }
                 }
+                // view booking history
                 case 6 -> {
                     Customer selectedCustomer = promptCustomerID();
                     

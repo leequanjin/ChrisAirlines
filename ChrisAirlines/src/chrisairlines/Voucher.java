@@ -1,6 +1,6 @@
 package chrisairlines;
 
-public class Voucher {
+abstract class Voucher {
     private String code;
     private String type;
     private String description;
