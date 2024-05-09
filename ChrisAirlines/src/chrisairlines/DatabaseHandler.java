@@ -284,7 +284,7 @@ public class DatabaseHandler {
         }
     }
 
-    // used to load all voucher objects associated with a customer ID from redeemed_vouchers txt file and store in an arraylist for data modification
+    // used to load all voucher objects associated with a cusstomer ID cufrom redeemed_vouchers txt file and store in an arraylist for data modification
     public static List<VoucherDetails> loadRedeemedVouchersByCustomerID(String customerId, String filename) {
         List<VoucherDetails> redeemedVouchers = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
@@ -335,7 +335,7 @@ public class DatabaseHandler {
         return redeemedVouchers;
     }
     
-    // used to load all customer records from customer_details txt and store in an arraylist for data modification
+    // used to load all booking details objects associated with a cusstomer ID  from booking_details txt and store in an arraylist for data modification
     public static List<BookingDetails> loadBookingsFromFile(String customerID, String filename) {
         List<BookingDetails> bookedFlights = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
