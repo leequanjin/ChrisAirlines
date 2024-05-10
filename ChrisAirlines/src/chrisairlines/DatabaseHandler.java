@@ -12,7 +12,7 @@ import java.util.List;
 public class DatabaseHandler {
 
     // used to append new customer object to customer_details txt file
-    public static void saveCustomerDetailsToFile(Customer customer, String filename) {
+    public static void saveCustomerDetailsToFile(String filename, Customer customer) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename, true))) {
             writer.write(customer.toString() + "\n");
             System.out.println("Customer details saved to file successfully.");
@@ -22,7 +22,7 @@ public class DatabaseHandler {
     }
 
     // used to append new voucher object to voucher_details txt file
-    public static void saveVoucherDetailsToFile(Voucher voucher, String filename) {
+    public static void saveVoucherDetailsToFile(String filename, Voucher voucher) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename, true))) {
             writer.write(voucher.toString() + "\n");
             System.out.println("Voucher details saved to file successfully.");
@@ -32,7 +32,7 @@ public class DatabaseHandler {
     }
 
     // used to append new voucher details object and associated customer id to redeemed_vouchers txt file
-    public static void saveRedeemedVoucherToFile(VoucherDetails voucherDetails, String filename) {
+    public static void saveRedeemedVoucherToFile(String filename, VoucherDetails voucherDetails) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename, true))) {
             writer.write(voucherDetails.toString() + "\n");
         } catch (IOException e) {
@@ -252,7 +252,7 @@ public class DatabaseHandler {
     }
     
     // used to rewrite all contents into customer_details txt file after modifying customers array list
-    private static void writeCustomersToFile(String filename, List<Customer> customers) {
+    public static void writeCustomersToFile(String filename, List<Customer> customers) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
             for (Customer customer : customers) {
                 writer.write(customer.toString() + "\n");
@@ -263,7 +263,7 @@ public class DatabaseHandler {
     }
     
     // used to rewrite all contents into voucher_details txt file after modifying vouchers array list
-    private static void writeVouchersToFile(String filename, List<Voucher> vouchers) {
+    public static void writeVouchersToFile(String filename, List<Voucher> vouchers) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
             for (Voucher voucher : vouchers) {
                 writer.write(voucher.toString() + "\n");
@@ -274,7 +274,7 @@ public class DatabaseHandler {
     }
     
     // used to rewrite all contents into voucher_details txt file after modifying vouchers array list
-    private static void writeRedeemedVouchersToFile(String filename, List<VoucherDetails> redeemedVouchers) {
+    public static void writeRedeemedVouchersToFile(String filename, List<VoucherDetails> redeemedVouchers) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
             for (VoucherDetails redeemedVoucher : redeemedVouchers) {
                 writer.write(redeemedVoucher.toString() + "\n");
@@ -285,7 +285,7 @@ public class DatabaseHandler {
     }
 
     // used to load all voucher objects associated with a cusstomer ID cufrom redeemed_vouchers txt file and store in an arraylist for data modification
-    public static List<VoucherDetails> loadRedeemedVouchersByCustomerID(String customerId, String filename) {
+    public static List<VoucherDetails> loadRedeemedVouchersByCustomerId(String customerId, String filename) {
         List<VoucherDetails> redeemedVouchers = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String line;
@@ -336,23 +336,24 @@ public class DatabaseHandler {
     }
     
     // used to load all booking details objects associated with a cusstomer ID  from booking_details txt and store in an arraylist for data modification
-    public static List<BookingDetails> loadBookingsFromFile(String customerID, String filename) {
+    public static List<BookingDetails> loadBookingsByCustomerId(String customerId, String filename) {
         List<BookingDetails> bookedFlights = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
-                Flight flight = new Flight(parts[1], 
-                        Double.parseDouble(parts[2]), 
-                        parts[3], parts[4], parts[5], parts[6]);
-                BookingDetails bookedFlight = new BookingDetails(flight, 
-                        Integer.parseInt(parts[7]), 
-                        Double.parseDouble(parts[8]), 
-                        LocalDateTime.parse(parts[9]), 
-                        Double.parseDouble(parts[10]), 
-                        parts[11]);
-                
-                bookedFlights.add(bookedFlight);
+                if (parts[0].equals(customerId)) {
+                    Flight flight = new Flight(parts[1], 
+                            Double.parseDouble(parts[2]), 
+                            parts[3], parts[4], parts[5], parts[6]);
+                    BookingDetails bookedFlight = new BookingDetails(flight, 
+                            Integer.parseInt(parts[7]), 
+                            Double.parseDouble(parts[8]), 
+                            LocalDateTime.parse(parts[9]), 
+                            Double.parseDouble(parts[10]), 
+                            parts[11]);
+                    bookedFlights.add(bookedFlight);
+                }
             }
         } catch (IOException e) {
             System.err.println("Error reading file: " + e.getMessage());

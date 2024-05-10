@@ -14,7 +14,6 @@ public class Customer {
     private String loyaltyTier;
     private ArrayList<VoucherDetails> redeemedVouchers;
     private ArrayList<BookingDetails> bookedFlights;
-    
 
     public Customer(){
     
@@ -119,7 +118,6 @@ public class Customer {
         earnMileagePoints(totalAmount);
         earnLoyaltyPoints(totalAmount);
         BookingDetails bookingDetails = new BookingDetails(flight, quantity, totalAmount, bookingDateTime, 0, "-");
-        DatabaseHandler.saveBookingDetailToFile(customerId, bookingDetails);
         return bookingDetails;
     }
     
@@ -129,7 +127,6 @@ public class Customer {
         earnMileagePoints(totalAmount);
         earnLoyaltyPoints(totalAmount);
         BookingDetails bookingDetails = new BookingDetails(flight, quantity, totalAmount, bookingDateTime, discount, "-");
-        DatabaseHandler.saveBookingDetailToFile(customerId, bookingDetails);
         return bookingDetails;
     }
 
@@ -140,7 +137,6 @@ public class Customer {
         earnMileagePoints(totalAmount);
         earnLoyaltyPoints(totalAmount);
         BookingDetails bookingDetails = new BookingDetails(flight, quantity, totalAmount, bookingDateTime, discount, "-");
-        DatabaseHandler.saveBookingDetailToFile(customerId, bookingDetails);
         return bookingDetails;
     }
     
@@ -151,7 +147,6 @@ public class Customer {
         earnMileagePoints(totalAmount);
         earnLoyaltyPoints(totalAmount);
         BookingDetails bookingDetails = new BookingDetails(flight, quantity, totalAmount, bookingDateTime, 0, reward);
-        DatabaseHandler.saveBookingDetailToFile(customerId, bookingDetails);
         return bookingDetails;
     }
 
@@ -161,10 +156,9 @@ public class Customer {
 
     public void setRedeemedVouchers(List<VoucherDetails> redeemedVouchers) {
         this.redeemedVouchers = (ArrayList<VoucherDetails>) redeemedVouchers;
-        updateVoucherStatus();
     }
     
-    public void redeemVoucher(String id, int requiredPoints, Voucher voucher, LocalDateTime redeemedDateTime) {
+    public VoucherDetails redeemVoucher(String id, int requiredPoints, Voucher voucher, LocalDateTime redeemedDateTime) {
         this.mileagePoints -= requiredPoints;
         voucher.setStock(voucher.getStock() - 1);
         
@@ -187,23 +181,19 @@ public class Customer {
         }
         
         VoucherDetails voucherDetails = new VoucherDetails(id, this.id, voucher, redeemedDateTime, discountAmount, discountRate, reward);
-        DatabaseHandler.updateCustomerInfo("customer_details.txt", this);
-        DatabaseHandler.saveRedeemedVoucherToFile(voucherDetails, "redeemed_vouchers.txt");
-        DatabaseHandler.updateVoucherDetails("voucher_details.txt", voucher);
+        return voucherDetails;
     }
     
     public void earnMileagePoints(double totalAmount) {
-        double bonusPercentage = PointCalculation.getBonusPercentage(loyaltyTier);
-        int pointsEarned = PointCalculation.calculateMileagePoints(totalAmount, bonusPercentage);
+        double bonusPercentage = getBonusPercentage(loyaltyTier);
+        int pointsEarned = calculateMileagePoints(totalAmount, bonusPercentage);
         this.mileagePoints += pointsEarned;
-        DatabaseHandler.updateCustomerInfo("customer_details.txt", this);
     }
 
     public void earnLoyaltyPoints(double totalAmount) {
-        int pointsEarned = PointCalculation.calculateLoyaltyPoints(totalAmount);
+        int pointsEarned = calculateLoyaltyPoints(totalAmount);
         this.loyaltyPoints += pointsEarned;
         updateLoyaltyTier();
-        DatabaseHandler.updateCustomerInfo("customer_details.txt", this);
     }
 
     private void updateLoyaltyTier() {
@@ -218,15 +208,23 @@ public class Customer {
         }
     }
     
-    public void updateVoucherStatus() {
-        for (VoucherDetails redeemedVoucher : redeemedVouchers) {
-            if (redeemedVoucher.getStatus().equals("Used")){
-                break;
-            } else if(redeemedVoucher.getExpiryDateTime().isBefore(LocalDateTime.now())){
-                redeemedVoucher.setStatus("Expired");
-            } 
-            DatabaseHandler.updateRedeemedVouchers("redeemed_vouchers.txt", redeemedVoucher);
-        }  
+    public static int calculateMileagePoints(double totalAmount, double bonusPercentage) {
+        return (int) (totalAmount * bonusPercentage);
+    }
+
+    public static double getBonusPercentage(String loyaltyTier) {
+        double baseBonus = 0.0;
+        switch (loyaltyTier) {
+            case "Bronze" -> baseBonus = 0.0;
+            case "Silver" -> baseBonus = 0.1;
+            case "Gold" -> baseBonus = 0.15;
+            case "Platinum" -> baseBonus = 0.20;
+        }
+        return 1.0 + baseBonus;
+    }
+
+    public static int calculateLoyaltyPoints(double totalAmount) {
+        return (int) totalAmount;
     }
 
     @Override

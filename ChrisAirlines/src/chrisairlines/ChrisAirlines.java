@@ -15,7 +15,7 @@ public class ChrisAirlines {
 
         int selection;
         do {
-            selection = menu();
+            selection = displayMenu();
 
             switch (selection) {
                 // add customer
@@ -65,7 +65,7 @@ public class ChrisAirlines {
                             System.out.printf("%-15s%-15s%-50s%15s%n", "Voucher ID", "Voucher Code", "Description", "Expiry Date");
                             System.out.println("----------------------------------------------------------------------------------------------------------------");
 
-                            List<VoucherDetails> redeemedVouchers = DatabaseHandler.loadRedeemedVouchersByCustomerID(selectedCustomer.getId(), "redeemed_vouchers.txt");
+                            List<VoucherDetails> redeemedVouchers = DatabaseHandler.loadRedeemedVouchersByCustomerId(selectedCustomer.getId(), "redeemed_vouchers.txt");
 
                             updateVoucherStatus(redeemedVouchers);
                             DatabaseHandler.writeRedeemedVouchersToFile("redeemed_vouchers.txt", redeemedVouchers);
@@ -79,6 +79,8 @@ public class ChrisAirlines {
                                             redeemedVoucher.getId(), voucher.getCode(), voucher.getDescription(), formattedExipryDateTime);
                                 }
                             }
+                            
+                            System.out.println("----------------------------------------------------------------------------------------------------------------");
 
                             System.out.println("\nWhich voucher would you like to use?");
                             System.out.print("Enter voucher ID: ");
@@ -162,15 +164,9 @@ public class ChrisAirlines {
 
                         System.out.println("\nREDEEM VOUCHER");
                         System.out.println("--------------");
-                        System.out.println("Available Vouchers:\n");
-                        System.out.printf("%-15s%-50s%15s%15s%n", "Voucher Code", "Description", "Points Required", "Stock Left");
-                        System.out.println("-----------------------------------------------------------------------------------------------");
-                        for (Voucher voucher : vouchers) {
-                            System.out.printf("%-15s%-50s%15d%15d%n", voucher.getCode(), voucher.getDescription(), voucher.getPointsRequired(), voucher.getStock());
-                        }
-                        System.out.println("-----------------------------------------------------------------------------------------------");
+                        displayVoucherList();
+                        
                         System.out.println("Available mileage points: " + selectedCustomer.getMileagePoints());
-
                         System.out.print("\nSelect voucher code (eg.1): ");
                         String voucherId = scanner.nextLine();
 
@@ -208,34 +204,7 @@ public class ChrisAirlines {
                     Customer selectedCustomer = promptCustomerID();
 
                     if (selectedCustomer != null) {
-                        System.out.println("\nVIEW PROFILE");
-                        System.out.println("------------");
-                        System.out.println("Customer ID: " + selectedCustomer.getId());
-                        System.out.println("Name: " + selectedCustomer.getName());
-                        System.out.println("Email: " + selectedCustomer.getEmail());
-                        System.out.println("Phone: " + selectedCustomer.getPhone());
-                        System.out.println("Mileage Points: " + selectedCustomer.getMileagePoints());
-                        System.out.println("Loyalty Points: " + selectedCustomer.getLoyaltyPoints());
-                        System.out.println("Loyalty Tier: " + selectedCustomer.getLoyaltyTier());
-
-                        System.out.println("\nYour Vouchers:\n");
-                        System.out.printf("%-15s%-15s%-50s%-20s%-20s%-20s%n", "Voucher ID", "Voucher Code", "Description", "Redeemed Date", "Expiry Date", "Status");
-                        System.out.println("-------------------------------------------------------------------------------------------------------------------------------");
-
-                        List<VoucherDetails> redeemedVouchers = DatabaseHandler.loadRedeemedVouchersByCustomerID(selectedCustomer.getId(), "redeemed_vouchers.txt");
-
-                        updateVoucherStatus(redeemedVouchers);
-                        DatabaseHandler.writeRedeemedVouchersToFile("redeemed_vouchers.txt", redeemedVouchers);
-                        selectedCustomer.setRedeemedVouchers(redeemedVouchers);
-
-                        for (VoucherDetails redeemedVoucher : selectedCustomer.getRedeemedVouchers()) {
-                            Voucher voucher = redeemedVoucher.getVoucher();
-                            String formattedRedeemedDateTime = redeemedVoucher.getRedeemedDateTime().format(formatter);
-                            String formattedExpiryDateTime = redeemedVoucher.getExpiryDateTime().format(formatter);
-                            System.out.printf("%-15s%-15s%-50s%-20s%-20s%-20s%n",
-                                    redeemedVoucher.getId(), voucher.getCode(), voucher.getDescription(), formattedRedeemedDateTime, formattedExpiryDateTime, redeemedVoucher.getStatus());
-                        }
-                        System.out.println("-------------------------------------------------------------------------------------------------------------------------------");
+                        displayProfileDetails(selectedCustomer);
                     } else {
                         System.out.println("Customer not found.");
                     }
@@ -243,43 +212,32 @@ public class ChrisAirlines {
                 // view booking history
                 case 6 -> {
                     Customer selectedCustomer = promptCustomerID();
-
+                    
                     if (selectedCustomer != null) {
-                        System.out.println("\nVIEW BOOKING HISTORY");
-                        System.out.println("--------------------");
-                        System.out.println("Customer's Booked Flights:\n");
-                        System.out.printf("%-15s%-15s%-15s%18s%18s%16s%10s%16s%15s%19s%35s%n", "Flight Code", "Origin", "Destination", "Departure Time", "Arrival Time", "Fare(RM)", "Quantity", "Discount(RM)", "Total(RM)", "Booking Date", "Additional Notes");
-                        System.out.println("------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
-                        for (BookingDetails bookedFlight : DatabaseHandler.loadBookingsFromFile(selectedCustomer.getId(), "booked_flights.txt")) {
-                            Flight flight = bookedFlight.getFlight();
-                            String formattedBookingDateTime = bookedFlight.getBookingDateTime().format(formatter);
-                            System.out.printf("%-15s%-15s%-15s%18s%18s%15.2f%11d%15.2f%15.2f%20s%35s%n",
-                                    flight.getFlightCode(),
-                                    flight.getOrigin(),
-                                    flight.getDestination(),
-                                    flight.getDepartureTime(),
-                                    flight.getArrivalTime(),
-                                    flight.getFare(),
-                                    bookedFlight.getQuantity(),
-                                    bookedFlight.getDiscount(),
-                                    bookedFlight.getTotalAmount(),
-                                    formattedBookingDateTime,
-                                    bookedFlight.getReward());
-                        }
-                        System.out.println("------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+                        displayBookingHistory(selectedCustomer);
                     } else {
                         System.out.println("Customer not found.");
                     }
+                }
+                // view all customers in system
+                case 7 -> {
+                    displayCustomerList();
+                }
+                // view all vouchers in system
+                case 8 -> {
+                    System.out.println("\nVOUCHER LIST");
+                    System.out.println("------------");
+                    displayVoucherList();
                 }
 
                 default -> {
                     System.out.println("\nTerminating Session...");
                 }
             }
-        } while (selection >= 1 && selection <= 7);
+        } while (selection >= 1 && selection <= 8);
     }
 
-    public static int menu() {
+    public static int displayMenu() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("\nMAIN MENU");
         System.out.println("---------");
@@ -289,7 +247,9 @@ public class ChrisAirlines {
         System.out.println("4. Redeem Voucher for Customer");
         System.out.println("5. View Customer Profile");
         System.out.println("6. View Customer Booking History");
-        System.out.println("7. Quit");
+        System.out.println("7. View All Customers in System");
+        System.out.println("8. View All Vouchers in System");
+        System.out.println("9. Quit");
         System.out.print("\nEnter your selection: ");
         int selection = scanner.nextInt();
         return selection;
@@ -405,14 +365,6 @@ public class ChrisAirlines {
     public static Customer promptCustomerID() {
         List<Customer> customers = DatabaseHandler.readCustomersFromFile("customer_details.txt");
 
-        System.out.println("LIST OF CUSTOMERS");
-        System.out.println("-----------------");
-        for (Customer customer : customers) {
-            System.out.println("Customer ID: " + customer.getId());
-            System.out.println("Name: " + customer.getName());
-            System.out.println("-----------------");
-        }
-
         System.out.print("Enter the ID of the customer you want to view details for: ");
         Scanner scanner = new Scanner(System.in);
         String customerId = scanner.nextLine();
@@ -428,6 +380,87 @@ public class ChrisAirlines {
         return (selectedCustomer);
     }
 
+    public static void displayProfileDetails(Customer selectedCustomer) {
+        System.out.println("\nVIEW PROFILE");
+        System.out.println("------------");
+        System.out.println("Customer ID: " + selectedCustomer.getId());
+        System.out.println("Name: " + selectedCustomer.getName());
+        System.out.println("Email: " + selectedCustomer.getEmail());
+        System.out.println("Phone: " + selectedCustomer.getPhone());
+        System.out.println("Mileage Points: " + selectedCustomer.getMileagePoints());
+        System.out.println("Loyalty Points: " + selectedCustomer.getLoyaltyPoints());
+        System.out.println("Loyalty Tier: " + selectedCustomer.getLoyaltyTier());
+
+        System.out.println("\nYour Vouchers:\n");
+        System.out.printf("%-15s%-15s%-50s%-20s%-20s%-20s%n", "Voucher ID", "Voucher Code", "Description", "Redeemed Date", "Expiry Date", "Status");
+        System.out.println("-------------------------------------------------------------------------------------------------------------------------------");
+
+        List<VoucherDetails> redeemedVouchers = DatabaseHandler.loadRedeemedVouchersByCustomerId(selectedCustomer.getId(), "redeemed_vouchers.txt");
+
+        updateVoucherStatus(redeemedVouchers);
+        DatabaseHandler.writeRedeemedVouchersToFile("redeemed_vouchers.txt", redeemedVouchers);
+        selectedCustomer.setRedeemedVouchers(redeemedVouchers);
+
+        for (VoucherDetails redeemedVoucher : selectedCustomer.getRedeemedVouchers()) {
+            Voucher voucher = redeemedVoucher.getVoucher();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            String formattedRedeemedDateTime = redeemedVoucher.getRedeemedDateTime().format(formatter);
+            String formattedExpiryDateTime = redeemedVoucher.getExpiryDateTime().format(formatter);
+            System.out.printf("%-15s%-15s%-50s%-20s%-20s%-20s%n",
+                    redeemedVoucher.getId(), voucher.getCode(), voucher.getDescription(), formattedRedeemedDateTime, formattedExpiryDateTime, redeemedVoucher.getStatus());
+        }
+        System.out.println("-------------------------------------------------------------------------------------------------------------------------------");
+    }
+    
+    public static void displayBookingHistory(Customer selectedCustomer) {
+        System.out.println("\nVIEW BOOKING HISTORY");
+        System.out.println("--------------------");
+        System.out.println(selectedCustomer.getName() + "'s Booked Flights:\n");
+        System.out.printf("%-15s%-15s%-15s%18s%18s%16s%10s%16s%15s%19s%35s%n", "Flight Code", "Origin", "Destination", "Departure Time", "Arrival Time", "Fare(RM)", "Quantity", "Discount(RM)", "Total(RM)", "Booking Date", "Additional Notes");
+        System.out.println("------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+        for (BookingDetails bookedFlight : DatabaseHandler.loadBookingsByCustomerId(selectedCustomer.getId(), "booked_flights.txt")) {
+            Flight flight = bookedFlight.getFlight();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            String formattedBookingDateTime = bookedFlight.getBookingDateTime().format(formatter);
+            System.out.printf("%-15s%-15s%-15s%18s%18s%15.2f%11d%15.2f%15.2f%20s%35s%n",
+                    flight.getFlightCode(),
+                    flight.getOrigin(),
+                    flight.getDestination(),
+                    flight.getDepartureTime(),
+                    flight.getArrivalTime(),
+                    flight.getFare(),
+                    bookedFlight.getQuantity(),
+                    bookedFlight.getDiscount(),
+                    bookedFlight.getTotalAmount(),
+                    formattedBookingDateTime,
+                    bookedFlight.getReward());
+        }
+        System.out.println("------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+    }
+    
+    public static void displayCustomerList() {
+        List<Customer> customers = DatabaseHandler.readCustomersFromFile("customer_details.txt");
+
+        System.out.println("\nLIST OF CUSTOMERS\n");
+        System.out.printf("%-15s%-50s%n", "Customer ID", "Customer Name");
+        System.out.println("---------------------------------------------------------------------------");
+        for (Customer customer : customers) {
+            System.out.printf("%-15s%-50s%n", customer.getId(), customer.getName());
+        }
+        System.out.println("---------------------------------------------------------------------------");
+    }
+    
+    public static void displayVoucherList() {
+        List<Voucher> vouchers = DatabaseHandler.readVouchersFromFile("voucher_details.txt");
+        System.out.println("\nLIST OF VOUCHERS\n");
+        System.out.printf("%-15s%-50s%15s%15s%n", "Voucher Code", "Description", "Points Required", "Stock Left");
+        System.out.println("-----------------------------------------------------------------------------------------------");
+        for (Voucher voucher : vouchers) {
+            System.out.printf("%-15s%-50s%15d%15d%n", voucher.getCode(), voucher.getDescription(), voucher.getPointsRequired(), voucher.getStock());
+        }
+        System.out.println("-----------------------------------------------------------------------------------------------");
+    }
+
     //update the status of voucher details
     public static List<VoucherDetails> updateVoucherStatus(List<VoucherDetails> redeemedVouchers) {
         for (VoucherDetails redeemedVoucher : redeemedVouchers) {
@@ -436,6 +469,7 @@ public class ChrisAirlines {
             } else if (redeemedVoucher.getExpiryDateTime().isBefore(LocalDateTime.now())) {
                 redeemedVoucher.setStatus("Expired");
             }
-
-            return redeemedVouchers;
         }
+        return redeemedVouchers;
+    }
+}

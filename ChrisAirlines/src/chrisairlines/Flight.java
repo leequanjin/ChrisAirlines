@@ -1,6 +1,6 @@
 package chrisairlines;
 
-class Flight {
+public class Flight {
     private String flightCode;
     private double fare;
     private String origin;
