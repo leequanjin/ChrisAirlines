@@ -151,7 +151,8 @@ public class ChrisAirlines {
 
                         DatabaseHandler.updateCustomerInfo("customer_details.txt", selectedCustomer);
 
-                    } else {
+                    } 
+                    else {
                         System.out.println("Customer not found.");
                     }
                 }
@@ -229,12 +230,16 @@ public class ChrisAirlines {
                     System.out.println("------------");
                     displayVoucherList();
                 }
+                // view all loyalty tier perks
+                case 9 -> {
+                    displayLoyaltyTierPerks();
+                }
 
                 default -> {
                     System.out.println("\nTerminating Session...");
                 }
             }
-        } while (selection >= 1 && selection <= 8);
+        } while (selection >= 1 && selection <= 9);
     }
 
     public static int displayMenu() {
@@ -249,7 +254,9 @@ public class ChrisAirlines {
         System.out.println("6. View Customer Booking History");
         System.out.println("7. View All Customers in System");
         System.out.println("8. View All Vouchers in System");
-        System.out.println("9. Quit");
+        System.out.println("9. View Loyalty Tier Perks");
+        System.out.println("10. Quit");
+        
         System.out.print("\nEnter your selection: ");
         int selection = scanner.nextInt();
         return selection;
@@ -389,7 +396,7 @@ public class ChrisAirlines {
         System.out.println("Phone: " + selectedCustomer.getPhone());
         System.out.println("Mileage Points: " + selectedCustomer.getMileagePoints());
         System.out.println("Loyalty Points: " + selectedCustomer.getLoyaltyPoints());
-        System.out.println("Loyalty Tier: " + selectedCustomer.getLoyaltyTier());
+        System.out.println("Loyalty Tier: " + selectedCustomer.getLoyaltyTier().getTierName());
 
         System.out.println("\nYour Vouchers:\n");
         System.out.printf("%-15s%-15s%-50s%-20s%-20s%-20s%n", "Voucher ID", "Voucher Code", "Description", "Redeemed Date", "Expiry Date", "Status");
@@ -459,6 +466,36 @@ public class ChrisAirlines {
             System.out.printf("%-15s%-50s%15d%15d%n", voucher.getCode(), voucher.getDescription(), voucher.getPointsRequired(), voucher.getStock());
         }
         System.out.println("-----------------------------------------------------------------------------------------------");
+    }
+    
+    public static void displayLoyaltyTierPerks() {
+        System.out.println("\nLOYALTY TIER PERKS");
+        System.out.println("------------------");
+
+        System.out.println("Bronze Tier " + displayRequiredPoints(new BronzeTier()));
+        displayPerks(new BronzeTier());
+
+        System.out.println("\nSilver Tier " + displayRequiredPoints(new SilverTier()));
+        displayPerks(new SilverTier());
+
+        System.out.println("\nGold Tier " + displayRequiredPoints(new GoldTier()));
+        displayPerks(new GoldTier());
+
+        System.out.println("\nPlatinum Tier " + displayRequiredPoints(new PlatinumTier()));
+        displayPerks(new PlatinumTier());
+    }
+
+    private static void displayPerks(LoyaltyTier loyaltyTier) {
+        List<String> perks = loyaltyTier.getPerks();
+        for (String perk : perks) {
+            System.out.println("- " + perk);
+        }
+    }
+    
+    public static String displayRequiredPoints(LoyaltyTier loyaltyTier) {
+        int minPoints = loyaltyTier.getMinPoints();
+        int maxPoints = loyaltyTier.getMaxPoints();
+        return("(" + minPoints + " - " + maxPoints + ")");
     }
 
     //update the status of voucher details

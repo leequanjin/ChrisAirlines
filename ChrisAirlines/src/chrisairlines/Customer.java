@@ -11,7 +11,7 @@ public class Customer {
     private String phone;
     private int mileagePoints;
     private int loyaltyPoints;
-    private String loyaltyTier;
+    private LoyaltyTier loyaltyTier;
     private ArrayList<VoucherDetails> redeemedVouchers;
     private ArrayList<BookingDetails> bookedFlights;
 
@@ -26,7 +26,7 @@ public class Customer {
         this.phone = phone;
         this.mileagePoints = 0;
         this.loyaltyPoints = 0;
-        this.loyaltyTier = "Bronze";
+        updateLoyaltyTier();
         this.redeemedVouchers = new ArrayList<>();
         this.bookedFlights = new ArrayList<>();
     }
@@ -38,10 +38,9 @@ public class Customer {
         this.phone = phone;
         this.mileagePoints = mileagePoints;
         this.loyaltyPoints = loyaltyPoints;
-        this.loyaltyTier = "Bronze";
-        this.redeemedVouchers = new ArrayList<>();
-        this.bookedFlights = new ArrayList<>();
         updateLoyaltyTier();
+        this.redeemedVouchers = new ArrayList<>();
+        this.bookedFlights = new ArrayList<>();  
     }
 
     // <editor-fold desc="getter & setters">
@@ -94,11 +93,11 @@ public class Customer {
         updateLoyaltyTier();
     }
 
-    public String getLoyaltyTier() {
+    public LoyaltyTier getLoyaltyTier() {
         return loyaltyTier;
     }
 
-    public void setLoyaltyTier(String loyaltyTier) {
+    public void setLoyaltyTier(LoyaltyTier loyaltyTier) {
         this.loyaltyTier = loyaltyTier;
     }
 
@@ -113,8 +112,7 @@ public class Customer {
     // </editor-fold>
     
     public BookingDetails bookFlight(String customerId, Flight flight, int quantity, LocalDateTime bookingDateTime) {
-        double discount = 0;
-        double totalAmount = flight.getFare() * quantity - discount;
+        double totalAmount = flight.getFare() * quantity;
         earnMileagePoints(totalAmount);
         earnLoyaltyPoints(totalAmount);
         BookingDetails bookingDetails = new BookingDetails(flight, quantity, totalAmount, bookingDateTime, 0, "-");
@@ -185,46 +183,27 @@ public class Customer {
     }
     
     public void earnMileagePoints(double totalAmount) {
-        double bonusPercentage = getBonusPercentage(loyaltyTier);
-        int pointsEarned = calculateMileagePoints(totalAmount, bonusPercentage);
+        double bonusMileage = loyaltyTier.calculateBonusMileage(totalAmount);
+        int pointsEarned = (int) (totalAmount + bonusMileage);
         this.mileagePoints += pointsEarned;
     }
 
     public void earnLoyaltyPoints(double totalAmount) {
-        int pointsEarned = calculateLoyaltyPoints(totalAmount);
+        int pointsEarned = (int) totalAmount;
         this.loyaltyPoints += pointsEarned;
         updateLoyaltyTier();
     }
 
-    private void updateLoyaltyTier() {
-        if (loyaltyPoints < 10000) {
-            this.loyaltyTier = "Bronze";
-        } else if (loyaltyPoints < 50000) {
-            this.loyaltyTier = "Silver";
-        } else if (loyaltyPoints < 100000) {
-            this.loyaltyTier = "Gold";
+    public final void updateLoyaltyTier() {
+        if (loyaltyPoints >= 0 && loyaltyPoints <= 10000) {
+            loyaltyTier = new BronzeTier();
+        } else if (loyaltyPoints >= 10001 && loyaltyPoints <= 50000) {
+            loyaltyTier = new SilverTier();
+        } else if (loyaltyPoints >= 50001 && loyaltyPoints <= 100000) {
+            loyaltyTier = new GoldTier();
         } else {
-            this.loyaltyTier = "Platinum";
+            loyaltyTier = new PlatinumTier();
         }
-    }
-    
-    public static int calculateMileagePoints(double totalAmount, double bonusPercentage) {
-        return (int) (totalAmount * bonusPercentage);
-    }
-
-    public static double getBonusPercentage(String loyaltyTier) {
-        double baseBonus = 0.0;
-        switch (loyaltyTier) {
-            case "Bronze" -> baseBonus = 0.0;
-            case "Silver" -> baseBonus = 0.1;
-            case "Gold" -> baseBonus = 0.15;
-            case "Platinum" -> baseBonus = 0.20;
-        }
-        return 1.0 + baseBonus;
-    }
-
-    public static int calculateLoyaltyPoints(double totalAmount) {
-        return (int) totalAmount;
     }
 
     @Override
