@@ -469,20 +469,21 @@ public class ChrisAirlines {
     }
     
     public static void displayLoyaltyTierPerks() {
+        LoyaltyTier[] loyaltyTiers = new LoyaltyTier[4];
+        
+        loyaltyTiers[0] = new BronzeTier();
+        loyaltyTiers[1] = new SilverTier();
+        loyaltyTiers[2] = new GoldTier();
+        loyaltyTiers[3] = new PlatinumTier();
+        
         System.out.println("\nLOYALTY TIER PERKS");
         System.out.println("------------------");
-
-        System.out.println("Bronze Tier " + displayRequiredPoints(new BronzeTier()));
-        displayPerks(new BronzeTier());
-
-        System.out.println("\nSilver Tier " + displayRequiredPoints(new SilverTier()));
-        displayPerks(new SilverTier());
-
-        System.out.println("\nGold Tier " + displayRequiredPoints(new GoldTier()));
-        displayPerks(new GoldTier());
-
-        System.out.println("\nPlatinum Tier " + displayRequiredPoints(new PlatinumTier()));
-        displayPerks(new PlatinumTier());
+        
+        for (LoyaltyTier tier : loyaltyTiers) {
+            System.out.println(tier.getTierName() + displayRequiredPoints(tier));
+            displayPerks(tier);
+            System.out.println("");
+        }
     }
 
     private static void displayPerks(LoyaltyTier loyaltyTier) {
@@ -495,7 +496,7 @@ public class ChrisAirlines {
     public static String displayRequiredPoints(LoyaltyTier loyaltyTier) {
         int minPoints = loyaltyTier.getMinPoints();
         int maxPoints = loyaltyTier.getMaxPoints();
-        return("(" + minPoints + " - " + maxPoints + ")");
+        return(" (" + minPoints + " - " + maxPoints + ")");
     }
 
     //update the status of voucher details

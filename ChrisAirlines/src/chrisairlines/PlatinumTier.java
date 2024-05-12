@@ -1,11 +1,11 @@
 package chrisairlines;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class PlatinumTier extends LoyaltyTier {
     public PlatinumTier() {
-        super("Platinum Tier", 100001, 999999);
+        super("Platinum Tier", 100001, 999999, initializePerks());
     }
     
     @Override
@@ -13,8 +13,12 @@ public class PlatinumTier extends LoyaltyTier {
         return totalAmount * 0.20;
     }
 
-    @Override
-    public List<String> getPerks() {
-        return Arrays.asList("20% bonus mileage points on flights", "Exclusive access to premium customer service", "Complimentary seat upgrades, subject to availability", "Exclusive invitations to Chris Airlines events");
+    private static ArrayList<String> initializePerks() {
+        return new ArrayList<>(Arrays.asList(
+            "20% bonus mileage points on flights",
+            "Exclusive access to premium customer service",
+            "Complimentary seat upgrades, subject to availability",
+            "Exclusive invitations to Chris Airlines events"
+        ));
     }
 }

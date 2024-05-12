@@ -1,11 +1,12 @@
 package chrisairlines;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class SilverTier extends LoyaltyTier {
     public SilverTier() {
-        super("Silver Tier", 10001, 50000);
+        super("Silver Tier", 10001, 50000, initializePerks());
     }
     
     @Override
@@ -13,8 +14,10 @@ public class SilverTier extends LoyaltyTier {
         return totalAmount * 0.1;
     }
 
-    @Override
-    public List<String> getPerks() {
-        return Arrays.asList("10% bonus mileage points on flights", "More baggage allowance");
+    private static ArrayList<String> initializePerks() {
+        return new ArrayList<>(Arrays.asList(
+                "10% bonus mileage points on flights", 
+                "More baggage allowance"
+        ));
     }
 }

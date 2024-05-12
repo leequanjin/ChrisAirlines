@@ -1,11 +1,11 @@
 package chrisairlines;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class GoldTier extends LoyaltyTier {
     public GoldTier() {
-        super("Gold Tier", 50001, 100000);
+        super("Gold Tier", 50001, 100000, initializePerks());
     }
     
     @Override
@@ -13,8 +13,12 @@ public class GoldTier extends LoyaltyTier {
         return totalAmount * 0.15;
     }
 
-    @Override
-    public List<String> getPerks() {
-        return Arrays.asList("15% bonus mileage points on flights", "Priority boarding", "Access to airport lounges", "Extra baggage allowance");
+    private static ArrayList<String> initializePerks() {
+        return new ArrayList<>(Arrays.asList(
+                "15% bonus mileage points on flights", 
+                "Priority boarding", 
+                "Access to airport lounges", 
+                "Extra baggage allowance"
+        ));
     }
 }

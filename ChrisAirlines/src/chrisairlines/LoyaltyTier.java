@@ -1,16 +1,18 @@
 package chrisairlines;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public abstract class LoyaltyTier {
     private String tierName;
     private int minPoints;
     private int maxPoints;
+    private ArrayList<String> perks;
 
-    public LoyaltyTier(String tierName, int minPoints, int maxPoints) {
+    public LoyaltyTier(String tierName, int minPoints, int maxPoints, ArrayList<String> perks) {
         this.tierName = tierName;
         this.minPoints = minPoints;
         this.maxPoints = maxPoints;
+        this.perks = perks;
     }
 
     public String getTierName() {
@@ -36,8 +38,14 @@ public abstract class LoyaltyTier {
     public void setMaxPoints(int maxPoints) {
         this.maxPoints = maxPoints;
     }
-    
-    public abstract double calculateBonusMileage(double totalAmount);
 
-    public abstract List<String> getPerks();
+    public ArrayList<String> getPerks() {
+        return perks;
+    }
+
+    public void setPerks(ArrayList<String> perks) {
+        this.perks = perks;
+    }
+
+    public abstract double calculateBonusMileage(double totalAmount);
 }
