@@ -8,24 +8,25 @@ import java.util.Scanner;
 public class ChrisAirlines {
 
     //Colours
-    static String Black = "\u001b[30m";
-    static String Red = "\u001b[31m";
-    static String Green = "\u001b[32;2m";
+    //static String Black = "\u001b[30m";
+    //static String Red = "\u001b[31m";
+    //static String Green = "\u001b[32;2m";
     static String Yellow = "\u001b[33m";
-    static String Blue = "\u001b[34m";
-    static String Magenta = "\u001b[35m";
+    //static String Blue = "\u001b[34m";
+    //static String Magenta = "\u001b[35m";
     static String Cyan = "\u001b[36m";
-    static String CyanBg = "\u001b[46m";
-    static String White = "\u001b[37;3m";
+    //static String CyanBg = "\u001b[46m";
+    //static String White = "\u001b[37;3m";
     static String Silver = "\u001b[37;2m";
-    static String BrightBlack = "\u001b[30;3m";
+    //static String BrightBlack = "\u001b[30;3m";
     static String BrightRed = "\u001b[31;1m";
-    static String BrightGreen = "\u001b[32;2m";
+    //static String BrightGreen = "\u001b[32;2m";
     static String BrightYellow = "\u001b[33;2m";
     static String BrightBlue = "\u001b[34;1m";
-    static String BrightMagenta = "\u001b[35;1m";
-    static String BrightCyan = "\u001b[36;1m";
-    static String BrightWhite = "\u001b[37;1m";
+    //static String BrightMagenta = "\u001b[35;1m";
+    static String BrightCyan = "\u001b[36;2m";
+    //static String BrightWhite = "\u001b[37;1m";
+    static String BrightWhiteBg = "\u001b[47;1m";
     static String Reset = "\u001b[0m";
     
     //Example use case
@@ -36,6 +37,12 @@ public class ChrisAirlines {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
         Booking booking = new Booking();
+        
+        List<Customer> customers = DatabaseHandler.readCustomersFromFile("customer_details.txt");
+        for (Customer customer : customers) {
+            customer.yearlyLoyaltyPointReset();
+            DatabaseHandler.updateCustomerInfo("customer_details.txt", customer);
+        }
 
         int selection;
         do {
@@ -57,8 +64,9 @@ public class ChrisAirlines {
                 // book ticket
                 case 3 -> {
                     Customer selectedCustomer = promptCustomerID();
-
+                    
                     if (selectedCustomer != null) {
+                        selectedCustomer.checkMileagePointValidity(selectedCustomer.getLastActivityDate());
                         System.out.println("\nBOOK TICKET");
                         System.out.println("-----------");
                         System.out.println("Available Flights:\n");
@@ -172,6 +180,7 @@ public class ChrisAirlines {
                             System.out.println(quantity + " " + selectedFlight.getFlightCode() + " flight tickets booked successfully for customer: " + selectedCustomer.getName());
                             System.out.printf("%s%.2f%n", "Total Amount Due: RM", bookingDetails.getTotalAmount());
                         }
+                        
                         selectedCustomer.setLastActivityDate(LocalDateTime.now());
                         DatabaseHandler.updateCustomerInfo("customer_details.txt", selectedCustomer);
 
@@ -185,8 +194,10 @@ public class ChrisAirlines {
                     Customer selectedCustomer = promptCustomerID();
 
                     if (selectedCustomer != null) {
+                        
                         List<Voucher> vouchers = DatabaseHandler.readVouchersFromFile("voucher_details.txt");
-
+                        selectedCustomer.checkMileagePointValidity(selectedCustomer.getLastActivityDate());
+                        
                         System.out.println("\nREDEEM VOUCHER");
                         System.out.println("--------------");
                         displayVoucherList();
@@ -209,7 +220,8 @@ public class ChrisAirlines {
                             LocalDateTime redemptionDateTime = LocalDateTime.now();
 
                             VoucherDetails voucherDetails = selectedCustomer.redeemVoucher(id, selectedVoucher.getPointsRequired(), selectedVoucher, redemptionDateTime);
-
+                            
+                            selectedCustomer.setLastActivityDate(LocalDateTime.now());
                             DatabaseHandler.updateCustomerInfo("customer_details.txt", selectedCustomer);
                             DatabaseHandler.saveRedeemedVoucherToFile("redeemed_vouchers.txt", voucherDetails);
                             DatabaseHandler.updateVoucherDetails("voucher_details.txt", selectedVoucher);
@@ -258,12 +270,16 @@ public class ChrisAirlines {
                 case 9 -> {
                     displayLoyaltyTierPerks();
                 }
+                
+                case 10 -> {
+                    displayPolicies();
+                }
 
                 default -> {
                     System.out.println("\nTerminating Session...");
                 }
             }
-        } while (selection >= 1 && selection <= 9);
+        } while (selection >= 1 && selection <= 10);
     }
 
     public static int displayMenu() {
@@ -279,7 +295,8 @@ public class ChrisAirlines {
         System.out.println("7. View All Customers in System");
         System.out.println("8. View All Vouchers in System");
         System.out.println("9. View Loyalty Tier Perks");
-        System.out.println("10. Quit");
+        System.out.println("10. View Policies");
+        System.out.println("11. Quit");
         
         System.out.print("\nEnter your selection: ");
         int selection = scanner.nextInt();
@@ -418,17 +435,19 @@ public class ChrisAirlines {
         System.out.println("Name: " + selectedCustomer.getName());
         System.out.println("Email: " + selectedCustomer.getEmail());
         System.out.println("Phone: " + selectedCustomer.getPhone());
+        selectedCustomer.checkMileagePointValidity(selectedCustomer.getLastActivityDate());
+        DatabaseHandler.updateCustomerInfo("customer_details.txt", selectedCustomer);
         System.out.println("Mileage Points: " + selectedCustomer.getMileagePoints());
-        System.out.println("Loyalty Points: " + selectedCustomer.getLoyaltyPoints());
+        System.out.println("Loyalty Points: " + selectedCustomer.getnewLoyaltyPoints());
         
         if ("Bronze Tier".equals(selectedCustomer.getLoyaltyTier().getTierName())){
-            System.out.println("Loyalty Tier: " + BrightYellow + selectedCustomer.getLoyaltyTier().getTierName() + Reset);
+            System.out.println("Loyalty Tier: " + Reset + BrightYellow + selectedCustomer.getLoyaltyTier().getTierName() + Reset);
         } else if ("Silver Tier".equals(selectedCustomer.getLoyaltyTier().getTierName())){
             System.out.println("Loyalty Tier: " + Reset + Silver + selectedCustomer.getLoyaltyTier().getTierName() + Reset);
         } else if ("Gold Tier".equals(selectedCustomer.getLoyaltyTier().getTierName())){
             System.out.println("Loyalty Tier: "  + Reset + Yellow + selectedCustomer.getLoyaltyTier().getTierName() + Reset);
         } else if ("Platinum Tier".equals(selectedCustomer.getLoyaltyTier().getTierName())){
-            System.out.println("Loyalty Tier: "  + Reset + BrightBlue + selectedCustomer.getLoyaltyTier().getTierName());
+            System.out.println("Loyalty Tier: "  + Reset + BrightBlue + selectedCustomer.getLoyaltyTier().getTierName() + Reset);
         } else {
             System.err.println("ERROR!");
         }
@@ -520,10 +539,49 @@ public class ChrisAirlines {
         System.out.println("------------------");
         
         for (LoyaltyTier tier : loyaltyTiers) {
-            System.out.println(tier.getTierName() + displayRequiredPoints(tier));
-            displayPerks(tier);
-            System.out.println("");
+            if ("Bronze Tier".equals(tier.getTierName())){
+                System.out.println(Reset + BrightYellow + tier.getTierName() + Reset + displayRequiredPoints(tier));
+                displayPerks(tier);
+                System.out.println("");
+            } else if ("Silver Tier".equals(tier.getTierName())){
+                System.out.println(Reset + Silver + tier.getTierName() + Reset + displayRequiredPoints(tier));
+                displayPerks(tier);
+                System.out.println("");
+            } else if ("Gold Tier".equals(tier.getTierName())){
+                System.out.println(Reset + Yellow + tier.getTierName() + Reset + displayRequiredPoints(tier));
+                displayPerks(tier);
+                System.out.println("");
+            } else if ("Platinum Tier".equals(tier.getTierName())){
+                System.out.println(Reset + BrightBlue + tier.getTierName() + Reset + displayRequiredPoints(tier));
+                displayPerks(tier);
+                System.out.println("");
+            } else {
+                System.err.println("ERROR!");
+            }
+//            System.out.println(tier.getTierName() + displayRequiredPoints(tier));
+//            displayPerks(tier);
+//            System.out.println("");
         }
+    }
+    
+    public static void displayPolicies(){
+        System.out.println("\nPolicies");
+        System.out.println("-----------");
+        System.out.println(BrightWhiteBg + "Mileage Points Terms" + Reset);
+        System.out.println("Mileage Points are earned based on the fare of " + BrightCyan + "flight (RM1 = 1pt)." + Reset);
+        System.out.println("Mileage Points can be multiplied  by the bonuses provided by either special promotions or loyalty tiers.");
+        System.out.println("Mileage Points can be exchanged for vouchers that can be redeemed for flight add-ons such as hotel stays, vacation packages, and merchandise.");
+        System.out.println("Mileage Points will not expire as long as there is " + BrightRed + " qualifying account activity at least once every 24 months." + Reset);
+        System.out.println("Qualifying activities include earning or redeeming Mileage Points for flights.");
+        
+        System.out.println(BrightWhiteBg + "Loyalty Points Terms" + Reset);
+        System.out.println("Loyalty Points are earned based on the fare of " + BrightCyan + "flight (RM1 = 1pt)." + Reset);
+        System.out.println("Loyalty Points will not be affected by bonuses.");
+        System.out.println("Loyalty Points will be evaluated based on the loyalty points you earned that year.");
+        System.out.println("Loyalty Tiers status last for the remainder of the calendar year in which you achieve it as well as the following calendar year.");
+        System.out.println("If the qualification criteria is not met in the following year, the Loyalty Tier will be downgraded based on their accumulated Loyalty Points.");
+        System.out.println("Loyalty Points will revert back to " + BrightRed + "zero" + Reset + " after the qualification period regardless of what Loyalty Tier the user has achieved.");
+        
     }
 
     private static void displayPerks(LoyaltyTier loyaltyTier) {

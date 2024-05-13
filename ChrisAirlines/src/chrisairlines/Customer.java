@@ -1,6 +1,7 @@
 package chrisairlines;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +11,8 @@ public class Customer {
     private String email;
     private String phone;
     private int mileagePoints;
-    private int loyaltyPoints;
+    private int prevloyaltyPoints;
+    private int newloyaltyPoints;
     private LoyaltyTier loyaltyTier;
     private ArrayList<VoucherDetails> redeemedVouchers;
     private ArrayList<BookingDetails> bookedFlights;
@@ -27,7 +29,8 @@ public class Customer {
         this.email = email;
         this.phone = phone;
         this.mileagePoints = 0;
-        this.loyaltyPoints = 0;
+        this.prevloyaltyPoints = 0;
+        this.newloyaltyPoints = 0;
         updateLoyaltyTier();
         this.redeemedVouchers = new ArrayList<>();
         this.bookedFlights = new ArrayList<>();
@@ -35,13 +38,14 @@ public class Customer {
         this.lastActivityDate = LocalDateTime.now();
     }
     
-    public Customer(String id, String name, String email, String phone, int mileagePoints, int loyaltyPoints) {
+    public Customer(String id, String name, String email, String phone, int mileagePoints , int newloyaltyPoints) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.phone = phone;
         this.mileagePoints = mileagePoints;
-        this.loyaltyPoints = loyaltyPoints;
+        this.prevloyaltyPoints = 0;
+        this.newloyaltyPoints = newloyaltyPoints;
         updateLoyaltyTier();
         this.redeemedVouchers = new ArrayList<>();
         this.bookedFlights = new ArrayList<>();
@@ -90,12 +94,21 @@ public class Customer {
         this.mileagePoints = mileagePoints;
     }
 
-    public int getLoyaltyPoints() {
-        return loyaltyPoints;
+    public int getprevLoyaltyPoints() {
+        return prevloyaltyPoints;
+    }
+    
+    public int getnewLoyaltyPoints() {
+        return newloyaltyPoints;
     }
 
-    public void setLoyaltyPoints(int loyaltyPoints) {
-        this.loyaltyPoints = loyaltyPoints;
+    public void setprevLoyaltyPoints(int prevloyaltyPoints) {
+        this.prevloyaltyPoints = prevloyaltyPoints;
+        updateLoyaltyTier();
+    }
+    
+    public void setnewLoyaltyPoints(int newloyaltyPoints) {
+        this.newloyaltyPoints = newloyaltyPoints;
         updateLoyaltyTier();
     }
 
@@ -211,24 +224,53 @@ public class Customer {
 
     public void earnLoyaltyPoints(double totalAmount) {
         int pointsEarned = (int) totalAmount;
-        this.loyaltyPoints += pointsEarned;
+        this.newloyaltyPoints += pointsEarned;
         updateLoyaltyTier();
     }
 
     public final void updateLoyaltyTier() {
-        if (loyaltyPoints >= 0 && loyaltyPoints <= 10000) {
-            loyaltyTier = new BronzeTier();
-        } else if (loyaltyPoints >= 10001 && loyaltyPoints <= 50000) {
-            loyaltyTier = new SilverTier();
-        } else if (loyaltyPoints >= 50001 && loyaltyPoints <= 100000) {
-            loyaltyTier = new GoldTier();
-        } else {
-            loyaltyTier = new PlatinumTier();
+        if (newloyaltyPoints > prevloyaltyPoints){
+            if (newloyaltyPoints >= 0 && newloyaltyPoints <= 10000) {
+                loyaltyTier = new BronzeTier();
+            } else if (newloyaltyPoints >= 10001 && newloyaltyPoints <= 50000) {
+                loyaltyTier = new SilverTier();
+            } else if (newloyaltyPoints >= 50001 && newloyaltyPoints <= 100000) {
+                loyaltyTier = new GoldTier();
+            } else {
+                loyaltyTier = new PlatinumTier();
+            }
+        }else {
+            if (prevloyaltyPoints >= 0 && prevloyaltyPoints <= 10000) {
+                loyaltyTier = new BronzeTier();
+            } else if (prevloyaltyPoints >= 10001 && prevloyaltyPoints <= 50000) {
+                loyaltyTier = new SilverTier();
+            } else if (prevloyaltyPoints >= 50001 && prevloyaltyPoints <= 100000) {
+                loyaltyTier = new GoldTier();
+            } else {
+                loyaltyTier = new PlatinumTier();
+            }
+        }
+    }
+
+    
+    public void checkMileagePointValidity(LocalDateTime lastActivityDate) {
+        if (lastActivityDate.until(LocalDateTime.now(), ChronoUnit.YEARS) > 2){
+            setMileagePoints(0);
+        } else{
+            getMileagePoints();
+        }   
+    }
+    
+    public void yearlyLoyaltyPointReset() {
+       if (LocalDateTime.now().getMonthValue() == 5 && LocalDateTime.now().getDayOfMonth() == 14){
+               setprevLoyaltyPoints(getnewLoyaltyPoints());
+               setnewLoyaltyPoints(0);    
         }
     }
 
     @Override
     public String toString() {
-        return id + "," + name + "," + email + "," + phone + "," + mileagePoints + "," + loyaltyPoints + "," + accountCreationDate +  "," + lastActivityDate;
+        //+ loyaltyTier + ","
+        return id + "," + name + "," + email + "," + phone + "," + mileagePoints + "," + prevloyaltyPoints + "," + newloyaltyPoints + ","+ accountCreationDate +  "," + lastActivityDate;
     }
 }

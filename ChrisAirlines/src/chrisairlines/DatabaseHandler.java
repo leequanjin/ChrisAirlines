@@ -77,7 +77,9 @@ public class DatabaseHandler {
                 customer.setEmail(selectedCustomer.getEmail());
                 customer.setPhone(selectedCustomer.getPhone());
                 customer.setMileagePoints(selectedCustomer.getMileagePoints());
-                customer.setLoyaltyPoints(selectedCustomer.getLoyaltyPoints());
+                customer.setprevLoyaltyPoints(selectedCustomer.getprevLoyaltyPoints());
+                customer.setnewLoyaltyPoints(selectedCustomer.getnewLoyaltyPoints());
+                customer.setLoyaltyTier(selectedCustomer.getLoyaltyTier());
                 customer.setAccountCreationDate(selectedCustomer.getAccountCreationDate());
                 customer.setLastActivityDate(selectedCustomer.getLastActivityDate());
                 break;
@@ -143,9 +145,10 @@ public class DatabaseHandler {
                 customer.setEmail(parts[2]);
                 customer.setPhone(parts[3]);
                 customer.setMileagePoints(Integer.parseInt(parts[4]));
-                customer.setLoyaltyPoints(Integer.parseInt(parts[5]));
-                customer.setAccountCreationDate(LocalDateTime.parse(parts[6]));
-                customer.setLastActivityDate(LocalDateTime.parse(parts[7]));
+                customer.setprevLoyaltyPoints(Integer.parseInt(parts[5]));
+                customer.setnewLoyaltyPoints(Integer.parseInt(parts[6]));
+                customer.setAccountCreationDate(LocalDateTime.parse(parts[7]));
+                customer.setLastActivityDate(LocalDateTime.parse(parts[8]));
                 customers.add(customer);
             }
         } catch (IOException e) {
