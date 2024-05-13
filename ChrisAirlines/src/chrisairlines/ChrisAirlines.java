@@ -10,16 +10,18 @@ public class ChrisAirlines {
     //Colours
     static String Black = "\u001b[30m";
     static String Red = "\u001b[31m";
-    static String Green = "\u001b[32m";
+    static String Green = "\u001b[32;2m";
     static String Yellow = "\u001b[33m";
     static String Blue = "\u001b[34m";
     static String Magenta = "\u001b[35m";
     static String Cyan = "\u001b[36m";
-    static String White = "\u001b[37m";
+    static String CyanBg = "\u001b[46m";
+    static String White = "\u001b[37;3m";
+    static String Silver = "\u001b[37;2m";
     static String BrightBlack = "\u001b[30;3m";
     static String BrightRed = "\u001b[31;1m";
     static String BrightGreen = "\u001b[32;2m";
-    static String BrightYellow = "\u001b[33;3m";
+    static String BrightYellow = "\u001b[33;2m";
     static String BrightBlue = "\u001b[34;1m";
     static String BrightMagenta = "\u001b[35;1m";
     static String BrightCyan = "\u001b[36;1m";
@@ -418,7 +420,19 @@ public class ChrisAirlines {
         System.out.println("Phone: " + selectedCustomer.getPhone());
         System.out.println("Mileage Points: " + selectedCustomer.getMileagePoints());
         System.out.println("Loyalty Points: " + selectedCustomer.getLoyaltyPoints());
-        System.out.println("Loyalty Tier: " + selectedCustomer.getLoyaltyTier().getTierName());
+        
+        if ("Bronze Tier".equals(selectedCustomer.getLoyaltyTier().getTierName())){
+            System.out.println("Loyalty Tier: " + BrightYellow + selectedCustomer.getLoyaltyTier().getTierName() + Reset);
+        } else if ("Silver Tier".equals(selectedCustomer.getLoyaltyTier().getTierName())){
+            System.out.println("Loyalty Tier: " + Reset + Silver + selectedCustomer.getLoyaltyTier().getTierName() + Reset);
+        } else if ("Gold Tier".equals(selectedCustomer.getLoyaltyTier().getTierName())){
+            System.out.println("Loyalty Tier: "  + Reset + Yellow + selectedCustomer.getLoyaltyTier().getTierName() + Reset);
+        } else if ("Platinum Tier".equals(selectedCustomer.getLoyaltyTier().getTierName())){
+            System.out.println("Loyalty Tier: "  + Reset + BrightBlue + selectedCustomer.getLoyaltyTier().getTierName());
+        } else {
+            System.err.println("ERROR!");
+        }
+        
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String formattedAccountCreationDate = selectedCustomer.getAccountCreationDate().format(formatter);
         String formattedLastActivityDate = selectedCustomer.getLastActivityDate().format(formatter);
