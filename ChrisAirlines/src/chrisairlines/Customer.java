@@ -108,7 +108,6 @@ public class Customer {
     public void setBookedFlights(List<BookingDetails> bookedFlights) {
         this.bookedFlights = (ArrayList<BookingDetails>) bookedFlights;
     }
-    
     // </editor-fold>
     
     public BookingDetails bookFlight(String customerId, Flight flight, int quantity, LocalDateTime bookingDateTime) {
