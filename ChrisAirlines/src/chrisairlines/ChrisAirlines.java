@@ -7,6 +7,28 @@ import java.util.Scanner;
 
 public class ChrisAirlines {
 
+    //Colours
+    static String Black = "\u001b[30m";
+    static String Red = "\u001b[31m";
+    static String Green = "\u001b[32m";
+    static String Yellow = "\u001b[33m";
+    static String Blue = "\u001b[34m";
+    static String Magenta = "\u001b[35m";
+    static String Cyan = "\u001b[36m";
+    static String White = "\u001b[37m";
+    static String BrightBlack = "\u001b[30;3m";
+    static String BrightRed = "\u001b[31;1m";
+    static String BrightGreen = "\u001b[32;2m";
+    static String BrightYellow = "\u001b[33;3m";
+    static String BrightBlue = "\u001b[34;1m";
+    static String BrightMagenta = "\u001b[35;1m";
+    static String BrightCyan = "\u001b[36;1m";
+    static String BrightWhite = "\u001b[37;1m";
+    static String Reset = "\u001b[0m";
+    
+    //Example use case
+    //System.out.println(Black + "Black Text" + Reset);
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -148,7 +170,7 @@ public class ChrisAirlines {
                             System.out.println(quantity + " " + selectedFlight.getFlightCode() + " flight tickets booked successfully for customer: " + selectedCustomer.getName());
                             System.out.printf("%s%.2f%n", "Total Amount Due: RM", bookingDetails.getTotalAmount());
                         }
-
+                        selectedCustomer.setLastActivityDate(LocalDateTime.now());
                         DatabaseHandler.updateCustomerInfo("customer_details.txt", selectedCustomer);
 
                     } 
@@ -397,6 +419,11 @@ public class ChrisAirlines {
         System.out.println("Mileage Points: " + selectedCustomer.getMileagePoints());
         System.out.println("Loyalty Points: " + selectedCustomer.getLoyaltyPoints());
         System.out.println("Loyalty Tier: " + selectedCustomer.getLoyaltyTier().getTierName());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String formattedAccountCreationDate = selectedCustomer.getAccountCreationDate().format(formatter);
+        String formattedLastActivityDate = selectedCustomer.getLastActivityDate().format(formatter);
+        System.out.println("Account Creation Date: " + formattedAccountCreationDate);
+        System.out.println("Last Activity Date: " + formattedLastActivityDate);
 
         System.out.println("\nYour Vouchers:\n");
         System.out.printf("%-15s%-15s%-50s%-20s%-20s%-20s%n", "Voucher ID", "Voucher Code", "Description", "Redeemed Date", "Expiry Date", "Status");
@@ -410,7 +437,6 @@ public class ChrisAirlines {
 
         for (VoucherDetails redeemedVoucher : selectedCustomer.getRedeemedVouchers()) {
             Voucher voucher = redeemedVoucher.getVoucher();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             String formattedRedeemedDateTime = redeemedVoucher.getRedeemedDateTime().format(formatter);
             String formattedExpiryDateTime = redeemedVoucher.getExpiryDateTime().format(formatter);
             System.out.printf("%-15s%-15s%-50s%-20s%-20s%-20s%n",
