@@ -14,6 +14,8 @@ public class Customer {
     private LoyaltyTier loyaltyTier;
     private ArrayList<VoucherDetails> redeemedVouchers;
     private ArrayList<BookingDetails> bookedFlights;
+    private LocalDateTime accountCreationDate;
+    private LocalDateTime lastActivityDate;
 
     public Customer(){
     
@@ -29,6 +31,8 @@ public class Customer {
         updateLoyaltyTier();
         this.redeemedVouchers = new ArrayList<>();
         this.bookedFlights = new ArrayList<>();
+        this.accountCreationDate = LocalDateTime.now();
+        this.lastActivityDate = LocalDateTime.now();
     }
     
     public Customer(String id, String name, String email, String phone, int mileagePoints, int loyaltyPoints) {
@@ -40,7 +44,9 @@ public class Customer {
         this.loyaltyPoints = loyaltyPoints;
         updateLoyaltyTier();
         this.redeemedVouchers = new ArrayList<>();
-        this.bookedFlights = new ArrayList<>();  
+        this.bookedFlights = new ArrayList<>();
+        this.accountCreationDate = LocalDateTime.now();
+        this.lastActivityDate = LocalDateTime.now();
     }
 
     // <editor-fold desc="getter & setters">
@@ -107,6 +113,22 @@ public class Customer {
 
     public void setBookedFlights(List<BookingDetails> bookedFlights) {
         this.bookedFlights = (ArrayList<BookingDetails>) bookedFlights;
+    }
+
+    public LocalDateTime getAccountCreationDate() {
+        return accountCreationDate;
+    }
+
+    public LocalDateTime getLastActivityDate() {
+        return lastActivityDate;
+    }
+
+    public void setAccountCreationDate(LocalDateTime accountCreationDate) {
+        this.accountCreationDate = accountCreationDate;
+    }
+
+    public void setLastActivityDate(LocalDateTime lastActivityDate) {
+        this.lastActivityDate = lastActivityDate;
     }
     // </editor-fold>
     
@@ -207,6 +229,6 @@ public class Customer {
 
     @Override
     public String toString() {
-        return id + "," + name + "," + email + "," + phone + "," + mileagePoints + "," + loyaltyPoints;
+        return id + "," + name + "," + email + "," + phone + "," + mileagePoints + "," + loyaltyPoints + "," + accountCreationDate +  "," + lastActivityDate;
     }
 }
