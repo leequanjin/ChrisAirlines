@@ -3,7 +3,10 @@ package chrisairlines;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ChrisAirlines {
 
@@ -28,16 +31,15 @@ public class ChrisAirlines {
     //static String BrightWhite = "\u001b[37;1m";
     static String BrightWhiteBg = "\u001b[47;1m";
     static String Reset = "\u001b[0m";
-    
+
     //Example use case
     //System.out.println(Black + "Black Text" + Reset);
-
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
         Booking booking = new Booking();
-        
+
         List<Customer> customers = DatabaseHandler.readCustomersFromFile("customer_details.txt");
         for (Customer customer : customers) {
             customer.yearlyLoyaltyPointReset();
@@ -46,7 +48,8 @@ public class ChrisAirlines {
 
         int selection;
         do {
-            selection = displayMenu();
+            displayMenu();
+            selection = getValidIntegerInput(scanner, "Enter selection: ", 1, 11);
 
             switch (selection) {
                 // add customer
@@ -64,7 +67,7 @@ public class ChrisAirlines {
                 // book ticket
                 case 3 -> {
                     Customer selectedCustomer = promptCustomerID();
-                    
+
                     if (selectedCustomer != null) {
                         selectedCustomer.checkMileagePointValidity(selectedCustomer.getLastActivityDate());
                         System.out.println("\nBOOK TICKET");
@@ -83,25 +86,45 @@ public class ChrisAirlines {
                         }
                         System.out.println("------------------------------------------------------------------------------------------------");
 
-                        System.out.print("\nSelect flight code(F001): ");
-                        String flight = scanner.nextLine();
-                        Flight selectedFlight = booking.getFlight(flight);
-                        System.out.print("Select ticket quantity(4): ");
-                        int quantity = scanner.nextInt();
-                        scanner.nextLine();
+                        String flightCode = getValidFlightCode(scanner, booking.getAvailableFlights());
+                        if ("0".equals(flightCode)) {
+                            System.out.println("Booking cancelled, returning to main menu...");
+                            break;
+                        }
 
-                        System.out.print("Use Voucher?(Y/N): ");
-                        String useVoucher = scanner.nextLine();
+                        Flight selectedFlight = booking.getFlight(flightCode);
+
+                        int quantity = getValidIntegerInput(scanner, "Select ticket quantity (0 to exit): ");
+
+                        if (quantity == 0) {
+                            System.out.println("Booking cancelled, returning to main menu...");
+                            break;
+                        }
+
+                        String useVoucher = getValidConfirmation(scanner, "Use Voucher?(Y/N): ");
                         if (useVoucher.equals("Y")) {
-                            System.out.println("\nAvailable Vouchers:");
-                            System.out.printf("%-15s%-15s%-50s%15s%n", "Voucher ID", "Voucher Code", "Description", "Expiry Date");
-                            System.out.println("----------------------------------------------------------------------------------------------------------------");
-
                             List<VoucherDetails> redeemedVouchers = DatabaseHandler.loadRedeemedVouchersByCustomerId(selectedCustomer.getId(), "redeemed_vouchers.txt");
-
                             updateVoucherStatus(redeemedVouchers);
                             DatabaseHandler.writeRedeemedVouchersToFile("redeemed_vouchers.txt", redeemedVouchers);
                             selectedCustomer.setRedeemedVouchers(redeemedVouchers);
+
+                            boolean voucherExists = false;
+                            for (VoucherDetails redeemedVoucher : selectedCustomer.getRedeemedVouchers()) {
+                                if (redeemedVoucher.getStatus().equals("Valid")) {
+                                    voucherExists = true;
+                                    break;
+                                }
+                            }
+
+                            if (!voucherExists) {
+                                System.out.println("\nSorry, you don't have any valid vouchers in your account.");
+                                System.out.println("Booking cancelled, returning to main menu...");
+                                break;
+                            }
+
+                            System.out.println("\nAvailable Vouchers:");
+                            System.out.printf("%-15s%-15s%-50s%15s%n", "Voucher ID", "Voucher Code", "Description", "Expiry Date");
+                            System.out.println("----------------------------------------------------------------------------------------------------------------");
 
                             for (VoucherDetails redeemedVoucher : selectedCustomer.getRedeemedVouchers()) {
                                 if (redeemedVoucher.getStatus().equals("Valid")) {
@@ -111,12 +134,15 @@ public class ChrisAirlines {
                                             redeemedVoucher.getId(), voucher.getCode(), voucher.getDescription(), formattedExipryDateTime);
                                 }
                             }
-                            
+
                             System.out.println("----------------------------------------------------------------------------------------------------------------");
 
-                            System.out.println("\nWhich voucher would you like to use?");
-                            System.out.print("Enter voucher ID: ");
-                            String selectedVoucher = scanner.nextLine();
+                            String selectedVoucher = getValidRedeemedVoucherId(scanner, redeemedVouchers, "Which voucher would you like to use? Enter voucher ID (0 to exit): ");
+
+                            if ("0".equals(selectedVoucher)) {
+                                System.out.println("Booking cancelled, returning to main menu...");
+                                break;
+                            }
 
                             for (VoucherDetails redeemedVoucher : selectedCustomer.getRedeemedVouchers()) {
                                 if (redeemedVoucher.getId().equals(selectedVoucher) && redeemedVoucher.getStatus().equals("Valid")) {
@@ -170,6 +196,7 @@ public class ChrisAirlines {
                                     System.out.println("Invalid voucher");
                                 }
                             }
+
                         } else {
                             LocalDateTime bookingDateTime = LocalDateTime.now();
                             BookingDetails bookingDetails = selectedCustomer.bookFlight(selectedCustomer.getId(), selectedFlight, quantity, bookingDateTime);
@@ -180,13 +207,12 @@ public class ChrisAirlines {
                             System.out.println(quantity + " " + selectedFlight.getFlightCode() + " flight tickets booked successfully for customer: " + selectedCustomer.getName());
                             System.out.printf("%s%.2f%n", "Total Amount Due: RM", bookingDetails.getTotalAmount());
                         }
-                        
+
                         selectedCustomer.setLastActivityDate(LocalDateTime.now());
                         DatabaseHandler.updateCustomerInfo("customer_details.txt", selectedCustomer);
 
-                    } 
-                    else {
-                        System.out.println("Customer not found.");
+                    } else {
+                        System.out.println("Customer not found, returning to main menu...");
                     }
                 }
                 // redeem voucher
@@ -194,21 +220,25 @@ public class ChrisAirlines {
                     Customer selectedCustomer = promptCustomerID();
 
                     if (selectedCustomer != null) {
-                        
+
                         List<Voucher> vouchers = DatabaseHandler.readVouchersFromFile("voucher_details.txt");
                         selectedCustomer.checkMileagePointValidity(selectedCustomer.getLastActivityDate());
-                        
+
                         System.out.println("\nREDEEM VOUCHER");
                         System.out.println("--------------");
                         displayVoucherList();
-                        
-                        System.out.println("Available mileage points: " + selectedCustomer.getMileagePoints());
-                        System.out.print("\nSelect voucher code (eg.1): ");
-                        String voucherId = scanner.nextLine();
 
+                        System.out.println("Available mileage points: " + selectedCustomer.getMileagePoints());
+                        
+                        String voucherCode = getValidVoucherCode(scanner, vouchers, "Select voucher code (0 to exit): ");
+                        if("0".equals(voucherCode)){
+                            System.out.println("Process cancelled, returning to main menu...");
+                            break;
+                        }
+                        
                         Voucher selectedVoucher = null;
                         for (Voucher voucher : vouchers) {
-                            if (voucher.getCode().equals(voucherId)) {
+                            if (voucher.getCode().equals(voucherCode)) {
                                 selectedVoucher = voucher;
                                 break;
                             }
@@ -220,7 +250,7 @@ public class ChrisAirlines {
                             LocalDateTime redemptionDateTime = LocalDateTime.now();
 
                             VoucherDetails voucherDetails = selectedCustomer.redeemVoucher(id, selectedVoucher.getPointsRequired(), selectedVoucher, redemptionDateTime);
-                            
+
                             selectedCustomer.setLastActivityDate(LocalDateTime.now());
                             DatabaseHandler.updateCustomerInfo("customer_details.txt", selectedCustomer);
                             DatabaseHandler.saveRedeemedVoucherToFile("redeemed_vouchers.txt", voucherDetails);
@@ -233,7 +263,7 @@ public class ChrisAirlines {
                             System.out.println("Invalid voucher code or insufficient mileage points for redemption or out of stock.");
                         }
                     } else {
-                        System.out.println("Customer not found.");
+                        System.out.println("Customer not found, returning to main menu...");
                     }
                 }
                 // view profile
@@ -243,17 +273,17 @@ public class ChrisAirlines {
                     if (selectedCustomer != null) {
                         displayProfileDetails(selectedCustomer);
                     } else {
-                        System.out.println("Customer not found.");
+                        System.out.println("Customer not found, returning to main menu...");
                     }
                 }
                 // view booking history
                 case 6 -> {
                     Customer selectedCustomer = promptCustomerID();
-                    
+
                     if (selectedCustomer != null) {
                         displayBookingHistory(selectedCustomer);
                     } else {
-                        System.out.println("Customer not found.");
+                        System.out.println("Customer not found, returning to main menu...");
                     }
                 }
                 // view all customers in system
@@ -270,7 +300,7 @@ public class ChrisAirlines {
                 case 9 -> {
                     displayLoyaltyTierPerks();
                 }
-                
+
                 case 10 -> {
                     displayPolicies();
                 }
@@ -282,8 +312,7 @@ public class ChrisAirlines {
         } while (selection >= 1 && selection <= 10);
     }
 
-    public static int displayMenu() {
-        Scanner scanner = new Scanner(System.in);
+    public static void displayMenu() {
         System.out.println("\nMAIN MENU");
         System.out.println("---------");
         System.out.println("1. Add Customer to system");
@@ -296,11 +325,93 @@ public class ChrisAirlines {
         System.out.println("8. View All Vouchers in System");
         System.out.println("9. View Loyalty Tier Perks");
         System.out.println("10. View Policies");
-        System.out.println("11. Quit");
-        
-        System.out.print("\nEnter your selection: ");
-        int selection = scanner.nextInt();
-        return selection;
+        System.out.println("11. Quit\n");
+    }
+
+    private static int getValidIntegerInput(Scanner scanner, String prompt, int minValue, int maxValue) {
+        int value;
+        while (true) {
+            System.out.print(prompt);
+            try {
+                value = Integer.parseInt(scanner.nextLine());
+                if (value < minValue || value > maxValue) {
+                    System.out.println("Invalid input! Please enter an integer between " + minValue + " and " + maxValue + ".");
+                } else {
+                    break;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input! Please enter a valid integer.");
+            }
+        }
+        return value;
+    }
+
+    private static double getValidDoubleInput(Scanner scanner, String prompt, double minValue, double maxValue) {
+        double value;
+        while (true) {
+            System.out.print(prompt);
+            try {
+                value = Double.parseDouble(scanner.nextLine());
+                if (value < minValue || value > maxValue) {
+                    System.out.println("Invalid input! Please enter an number between " + minValue + " and " + maxValue + ".");
+                } else {
+                    break;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input! Please enter a valid number.");
+            }
+        }
+        return value;
+    }
+
+    private static int getValidIntegerInput(Scanner scanner, String prompt) {
+        int value;
+        while (true) {
+            System.out.print(prompt);
+            try {
+                value = Integer.parseInt(scanner.nextLine());
+                if (value < 0) {
+                    System.out.println("Value cannot be negative. Please enter a valid integer.");
+                } else {
+                    break;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input! Please enter a valid integer.");
+            }
+        }
+        return value;
+    }
+
+    private static double getValidDoubleInput(Scanner scanner, String prompt) {
+        double value;
+        while (true) {
+            System.out.print(prompt);
+            try {
+                value = Double.parseDouble(scanner.nextLine());
+                if (value < 0) {
+                    System.out.println("Value cannot be negative. Please enter a valid number.");
+                } else {
+                    break;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input! Please enter a valid number.");
+            }
+        }
+        return value;
+    }
+
+    public static String getValidConfirmation(Scanner scanner, String prompt) {
+        String confirmation;
+        while (true) {
+            System.out.print(prompt);
+            confirmation = scanner.nextLine().trim().toUpperCase();
+            if (confirmation.equals("Y") || confirmation.equals("N")) {
+                break;
+            } else {
+                System.out.println("Invalid input! Please enter 'Y' for Yes or 'N' for No.");
+            }
+        }
+        return confirmation;
     }
 
     public static Customer enterCustomerDetails() {
@@ -311,22 +422,41 @@ public class ChrisAirlines {
         int newId = DatabaseHandler.generateNewId("customer_details.txt");
         String id = String.valueOf(newId);
 
-        System.out.print("Name: ");
-        String name = scanner.nextLine();
+        String name;
+        Pattern namePattern = Pattern.compile("^[A-Za-z ]+$");
+        do {
+            System.out.print("Name: ");
+            name = scanner.nextLine();
+            Matcher matcher = namePattern.matcher(name);
+            if (!matcher.matches() || name.isEmpty()) {
+                System.out.println("Invalid name. Only alphabets and spaces are allowed. Please enter a valid name.");
+            }
+        } while (!namePattern.matcher(name).matches() || name.isEmpty());
 
-        System.out.print("Email: ");
-        String email = scanner.nextLine();
+        String email;
+        Pattern emailPattern = Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
+        do {
+            System.out.print("Email: ");
+            email = scanner.nextLine();
+            Matcher matcher = emailPattern.matcher(email);
+            if (!matcher.matches()) {
+                System.out.println("Invalid email format. Please enter a valid email.");
+            }
+        } while (!emailPattern.matcher(email).matches());
 
-        System.out.print("Phone: ");
-        String phone = scanner.nextLine();
+        String phone;
+        Pattern phonePattern = Pattern.compile("^(\\d{10})$");
+        do {
+            System.out.print("Phone: ");
+            phone = scanner.nextLine();
+            Matcher matcher = phonePattern.matcher(phone);
+            if (!matcher.matches()) {
+                System.out.println("Invalid phone number format. Please enter a valid phone number (e.g.1234567890).");
+            }
+        } while (!phonePattern.matcher(phone).matches());
 
-        System.out.print("Mileage Points: ");
-        int mileagePoints = scanner.nextInt();
-        scanner.nextLine();
-
-        System.out.print("Loyalty Points: ");
-        int loyaltyPoints = scanner.nextInt();
-        scanner.nextLine();
+        int mileagePoints = getValidIntegerInput(scanner, "Mileage Points: ");
+        int loyaltyPoints = getValidIntegerInput(scanner, "Loyalty Points: ");
 
         return new Customer(id, name, email, phone, mileagePoints, loyaltyPoints);
     }
@@ -341,48 +471,32 @@ public class ChrisAirlines {
         System.out.println("-------------");
         System.out.println("1. Flat Discount Amount Voucher");
         System.out.println("2. Percentage Discount Rate Voucher");
-        System.out.println("3. Additional Rewards or Services Voucher\n");
-        System.out.print("Select voucher type: ");
+        System.out.println("3. Additional Rewards or Services Voucher");
 
-        int selection = scanner.nextInt();
-        scanner.nextLine();
+        int selection = getValidIntegerInput(scanner, "Enter voucher type: ", 1, 3);
 
         switch (selection) {
             case 1 -> {
-                System.out.print("Discount Amount: RM");
-                double discountAmount = scanner.nextDouble();
-                scanner.nextLine();
+                double discountAmount = getValidDoubleInput(scanner, "Discount Amount (RM): ");
 
                 String type = "Flat Discount Amount Voucher";
                 String formattedDiscountAmount = String.format("%.2f", discountAmount);
                 String description = "RM" + formattedDiscountAmount + " discount on next flight booking";
 
-                System.out.print("Points Required to Redeem: ");
-                int pointsRequired = scanner.nextInt();
-                scanner.nextLine();
-
-                System.out.print("Available Stock: ");
-                int stock = scanner.nextInt();
-                scanner.nextLine();
+                int pointsRequired = getValidIntegerInput(scanner, "Points Required to Redeem: ");
+                int stock = getValidIntegerInput(scanner, "Available Stock: ");
 
                 return new DiscountAmtVoucher(id, type, description, pointsRequired, stock, discountAmount);
             }
             case 2 -> {
-                System.out.print("Discount Rate (eg.0.2): ");
-                double discountRate = scanner.nextDouble();
-                scanner.nextLine();
+                double discountRate = getValidDoubleInput(scanner, "Discount Rate (eg.0.2):", 0, 1);
 
                 String type = "Percentage Discount Rate Voucher";
                 String formattedDiscountRate = String.format("%.0f", discountRate * 100);
                 String description = formattedDiscountRate + "% off on next flight booking";
 
-                System.out.print("Points Required to Redeem: ");
-                int pointsRequired = scanner.nextInt();
-                scanner.nextLine();
-
-                System.out.print("Available Stock: ");
-                int stock = scanner.nextInt();
-                scanner.nextLine();
+                int pointsRequired = getValidIntegerInput(scanner, "Points Required to Redeem: ");
+                int stock = getValidIntegerInput(scanner, "Available Stock: ");
 
                 return new DiscountRateVoucher(id, type, description, pointsRequired, stock, discountRate);
             }
@@ -393,13 +507,8 @@ public class ChrisAirlines {
                 String type = "Additional Rewards or Services Voucher";
                 String description = reward;
 
-                System.out.print("Points Required to Redeem: ");
-                int pointsRequired = scanner.nextInt();
-                scanner.nextLine();
-
-                System.out.print("Available Stock: ");
-                int stock = scanner.nextInt();
-                scanner.nextLine();
+                int pointsRequired = getValidIntegerInput(scanner, "Points Required to Redeem: ");
+                int stock = getValidIntegerInput(scanner, "Available Stock: ");
 
                 return new RewardVoucher(id, type, description, pointsRequired, stock, reward);
             }
@@ -428,6 +537,72 @@ public class ChrisAirlines {
         return (selectedCustomer);
     }
 
+    public static String getValidFlightCode(Scanner scanner, Map<String, Flight> availableFlights) {
+        String flightCode;
+        while (true) {
+            System.out.print("Select flight code (0 to exit): ");
+            flightCode = scanner.nextLine();
+            if (availableFlights.containsKey(flightCode)) {
+                break;
+            } else if ("0".equals(flightCode)) {
+                break;
+            } else {
+                System.out.println("Invalid flight code! Please select a flight code from the available flights.");
+            }
+        }
+        return flightCode;
+    }
+
+    public static String getValidRedeemedVoucherId(Scanner scanner, List<VoucherDetails> redeemedVouchers, String prompt) {
+        String selectedVoucherId;
+        while (true) {
+            System.out.print(prompt);
+            selectedVoucherId = scanner.nextLine();
+            boolean isValid = false;
+            if ("0".equals(selectedVoucherId)) {
+                isValid = true;
+            } else {
+                for (VoucherDetails voucherDetails : redeemedVouchers) {
+                    if (voucherDetails.getId().equals(selectedVoucherId) && voucherDetails.getStatus().equals("Valid")) {
+                        isValid = true;
+                        break;
+                    }
+                }
+            }
+            if (isValid) {
+                break;
+            } else {
+                System.out.println("Invalid voucher ID! Please select a voucher ID from the available vouchers.");
+            }
+        }
+        return selectedVoucherId;
+    }
+    
+    public static String getValidVoucherCode(Scanner scanner, List<Voucher> vouchers, String prompt) {
+        String selectedVoucherCode;
+        while (true) {
+            System.out.print(prompt);
+            selectedVoucherCode = scanner.nextLine();
+            boolean isValid = false;
+            if ("0".equals(selectedVoucherCode)) {
+                isValid = true;
+            } else {
+                for (Voucher voucher : vouchers) {
+                    if (voucher.getCode().equals(selectedVoucherCode)) {
+                        isValid = true;
+                        break;
+                    }
+                }
+            }
+            if (isValid) {
+                break;
+            } else {
+                System.out.println("Invalid voucher code! Please select a voucher code from the available vouchers.");
+            }
+        }
+        return selectedVoucherCode;
+    }
+
     public static void displayProfileDetails(Customer selectedCustomer) {
         System.out.println("\nVIEW PROFILE");
         System.out.println("------------");
@@ -439,19 +614,19 @@ public class ChrisAirlines {
         DatabaseHandler.updateCustomerInfo("customer_details.txt", selectedCustomer);
         System.out.println("Mileage Points: " + selectedCustomer.getMileagePoints());
         System.out.println("Loyalty Points: " + selectedCustomer.getnewLoyaltyPoints());
-        
-        if ("Bronze Tier".equals(selectedCustomer.getLoyaltyTier().getTierName())){
+
+        if ("Bronze Tier".equals(selectedCustomer.getLoyaltyTier().getTierName())) {
             System.out.println("Loyalty Tier: " + Reset + BrightYellow + selectedCustomer.getLoyaltyTier().getTierName() + Reset);
-        } else if ("Silver Tier".equals(selectedCustomer.getLoyaltyTier().getTierName())){
+        } else if ("Silver Tier".equals(selectedCustomer.getLoyaltyTier().getTierName())) {
             System.out.println("Loyalty Tier: " + Reset + Silver + selectedCustomer.getLoyaltyTier().getTierName() + Reset);
-        } else if ("Gold Tier".equals(selectedCustomer.getLoyaltyTier().getTierName())){
-            System.out.println("Loyalty Tier: "  + Reset + Yellow + selectedCustomer.getLoyaltyTier().getTierName() + Reset);
-        } else if ("Platinum Tier".equals(selectedCustomer.getLoyaltyTier().getTierName())){
-            System.out.println("Loyalty Tier: "  + Reset + BrightBlue + selectedCustomer.getLoyaltyTier().getTierName() + Reset);
+        } else if ("Gold Tier".equals(selectedCustomer.getLoyaltyTier().getTierName())) {
+            System.out.println("Loyalty Tier: " + Reset + Yellow + selectedCustomer.getLoyaltyTier().getTierName() + Reset);
+        } else if ("Platinum Tier".equals(selectedCustomer.getLoyaltyTier().getTierName())) {
+            System.out.println("Loyalty Tier: " + Reset + BrightBlue + selectedCustomer.getLoyaltyTier().getTierName() + Reset);
         } else {
             System.err.println("ERROR!");
         }
-        
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String formattedAccountCreationDate = selectedCustomer.getAccountCreationDate().format(formatter);
         String formattedLastActivityDate = selectedCustomer.getLastActivityDate().format(formatter);
@@ -477,7 +652,7 @@ public class ChrisAirlines {
         }
         System.out.println("-------------------------------------------------------------------------------------------------------------------------------");
     }
-    
+
     public static void displayBookingHistory(Customer selectedCustomer) {
         System.out.println("\nVIEW BOOKING HISTORY");
         System.out.println("--------------------");
@@ -503,7 +678,7 @@ public class ChrisAirlines {
         }
         System.out.println("------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
     }
-    
+
     public static void displayCustomerList() {
         List<Customer> customers = DatabaseHandler.readCustomersFromFile("customer_details.txt");
 
@@ -515,10 +690,10 @@ public class ChrisAirlines {
         }
         System.out.println("---------------------------------------------------------------------------");
     }
-    
+
     public static void displayVoucherList() {
         List<Voucher> vouchers = DatabaseHandler.readVouchersFromFile("voucher_details.txt");
-        System.out.println("\nLIST OF VOUCHERS\n");
+        System.out.println("LIST OF VOUCHERS\n");
         System.out.printf("%-15s%-50s%15s%15s%n", "Voucher Code", "Description", "Points Required", "Stock Left");
         System.out.println("-----------------------------------------------------------------------------------------------");
         for (Voucher voucher : vouchers) {
@@ -526,32 +701,32 @@ public class ChrisAirlines {
         }
         System.out.println("-----------------------------------------------------------------------------------------------");
     }
-    
+
     public static void displayLoyaltyTierPerks() {
         LoyaltyTier[] loyaltyTiers = new LoyaltyTier[4];
-        
+
         loyaltyTiers[0] = new BronzeTier();
         loyaltyTiers[1] = new SilverTier();
         loyaltyTiers[2] = new GoldTier();
         loyaltyTiers[3] = new PlatinumTier();
-        
+
         System.out.println("\nLOYALTY TIER PERKS");
         System.out.println("------------------");
-        
+
         for (LoyaltyTier tier : loyaltyTiers) {
-            if ("Bronze Tier".equals(tier.getTierName())){
+            if ("Bronze Tier".equals(tier.getTierName())) {
                 System.out.println(Reset + BrightYellow + tier.getTierName() + Reset + displayRequiredPoints(tier));
                 displayPerks(tier);
                 System.out.println("");
-            } else if ("Silver Tier".equals(tier.getTierName())){
+            } else if ("Silver Tier".equals(tier.getTierName())) {
                 System.out.println(Reset + Silver + tier.getTierName() + Reset + displayRequiredPoints(tier));
                 displayPerks(tier);
                 System.out.println("");
-            } else if ("Gold Tier".equals(tier.getTierName())){
+            } else if ("Gold Tier".equals(tier.getTierName())) {
                 System.out.println(Reset + Yellow + tier.getTierName() + Reset + displayRequiredPoints(tier));
                 displayPerks(tier);
                 System.out.println("");
-            } else if ("Platinum Tier".equals(tier.getTierName())){
+            } else if ("Platinum Tier".equals(tier.getTierName())) {
                 System.out.println(Reset + BrightBlue + tier.getTierName() + Reset + displayRequiredPoints(tier));
                 displayPerks(tier);
                 System.out.println("");
@@ -563,8 +738,8 @@ public class ChrisAirlines {
 //            System.out.println("");
         }
     }
-    
-    public static void displayPolicies(){
+
+    public static void displayPolicies() {
         System.out.println("\nPolicies");
         System.out.println("-----------");
         System.out.println(BrightWhiteBg + "Mileage Points Terms" + Reset);
@@ -573,7 +748,7 @@ public class ChrisAirlines {
         System.out.println("Mileage Points can be exchanged for vouchers that can be redeemed for flight add-ons such as hotel stays, vacation packages, and merchandise.");
         System.out.println("Mileage Points will not expire as long as there is " + BrightRed + " qualifying account activity at least once every 24 months." + Reset);
         System.out.println("Qualifying activities include earning or redeeming Mileage Points for flights.");
-        
+
         System.out.println(BrightWhiteBg + "Loyalty Points Terms" + Reset);
         System.out.println("Loyalty Points are earned based on the fare of " + BrightCyan + "flight (RM1 = 1pt)." + Reset);
         System.out.println("Loyalty Points will not be affected by bonuses.");
@@ -581,7 +756,7 @@ public class ChrisAirlines {
         System.out.println("Loyalty Tiers status last for the remainder of the calendar year in which you achieve it as well as the following calendar year.");
         System.out.println("If the qualification criteria is not met in the following year, the Loyalty Tier will be downgraded based on their accumulated Loyalty Points.");
         System.out.println("Loyalty Points will revert back to " + BrightRed + "zero" + Reset + " after the qualification period regardless of what Loyalty Tier the user has achieved.");
-        
+
     }
 
     private static void displayPerks(LoyaltyTier loyaltyTier) {
@@ -590,11 +765,11 @@ public class ChrisAirlines {
             System.out.println("- " + perk);
         }
     }
-    
+
     public static String displayRequiredPoints(LoyaltyTier loyaltyTier) {
         int minPoints = loyaltyTier.getMinPoints();
         int maxPoints = loyaltyTier.getMaxPoints();
-        return(" (" + minPoints + " - " + maxPoints + ")");
+        return (" (" + minPoints + " - " + maxPoints + ")");
     }
 
     //update the status of voucher details
