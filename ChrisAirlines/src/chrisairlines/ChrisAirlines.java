@@ -11,8 +11,8 @@ import java.util.regex.Pattern;
 public class ChrisAirlines {
 
     //Colours
-    //static String Black = "\u001b[30m";
-    //static String Red = "\u001b[31m";
+    static String Black = "\u001b[30m";
+    static String Red = "\u001b[31m";
     //static String Green = "\u001b[32;2m";
     static String Yellow = "\u001b[33m";
     //static String Blue = "\u001b[34m";
@@ -23,13 +23,15 @@ public class ChrisAirlines {
     static String Silver = "\u001b[37;2m";
     //static String BrightBlack = "\u001b[30;3m";
     static String BrightRed = "\u001b[31;1m";
+    static String BrightRed2 = "\u001b[31;2m";
     //static String BrightGreen = "\u001b[32;2m";
     static String BrightYellow = "\u001b[33;2m";
     static String BrightBlue = "\u001b[34;1m";
     //static String BrightMagenta = "\u001b[35;1m";
     static String BrightCyan = "\u001b[36;2m";
     //static String BrightWhite = "\u001b[37;1m";
-    static String BrightWhiteBg = "\u001b[47;1m";
+    static String BrightWhiteBg = "\u001b[47;2m";
+    static String BrightWhiteBgLight = "\u001b[47;3m";
     static String Reset = "\u001b[0m";
 
     //Example use case
@@ -193,7 +195,7 @@ public class ChrisAirlines {
 
                                     break;
                                 } else {
-                                    System.out.println("Invalid voucher");
+                                    System.err.println("Invalid voucher");
                                 }
                             }
 
@@ -212,7 +214,7 @@ public class ChrisAirlines {
                         DatabaseHandler.updateCustomerInfo("customer_details.txt", selectedCustomer);
 
                     } else {
-                        System.out.println("Customer not found, returning to main menu...");
+                        System.out.println(Red + "Customer not found" + Reset + ", returning to main menu...");
                     }
                 }
                 // redeem voucher
@@ -260,10 +262,10 @@ public class ChrisAirlines {
                             System.out.println("Voucher " + selectedVoucher.getCode() + " redeemed successfully for customer: " + selectedCustomer.getName());
                             System.out.println("Redemption Date: " + formattedRedemptionDateTime);
                         } else {
-                            System.out.println("Invalid voucher code or insufficient mileage points for redemption or out of stock.");
+                            System.err.println("Invalid voucher code or insufficient mileage points for redemption or out of stock.");
                         }
                     } else {
-                        System.out.println("Customer not found, returning to main menu...");
+                        System.out.println(Red + "Customer not found" + Reset + ", returning to main menu...");
                     }
                 }
                 // view profile
@@ -273,7 +275,7 @@ public class ChrisAirlines {
                     if (selectedCustomer != null) {
                         displayProfileDetails(selectedCustomer);
                     } else {
-                        System.out.println("Customer not found, returning to main menu...");
+                        System.out.println(Red + "Customer not found" + Reset + ", returning to main menu...");
                     }
                 }
                 // view booking history
@@ -283,7 +285,7 @@ public class ChrisAirlines {
                     if (selectedCustomer != null) {
                         displayBookingHistory(selectedCustomer);
                     } else {
-                        System.out.println("Customer not found, returning to main menu...");
+                        System.out.println(Red + "Customer not found" + Reset + ", returning to main menu...");
                     }
                 }
                 // view all customers in system
@@ -335,12 +337,12 @@ public class ChrisAirlines {
             try {
                 value = Integer.parseInt(scanner.nextLine());
                 if (value < minValue || value > maxValue) {
-                    System.out.println("Invalid input! Please enter an integer between " + minValue + " and " + maxValue + ".");
+                    System.err.println("Invalid input! Please enter an integer between " + minValue + " and " + maxValue + ".");
                 } else {
                     break;
                 }
             } catch (NumberFormatException e) {
-                System.out.println("Invalid input! Please enter a valid integer.");
+                System.err.println("Invalid input! Please enter a valid integer.");
             }
         }
         return value;
@@ -353,12 +355,12 @@ public class ChrisAirlines {
             try {
                 value = Double.parseDouble(scanner.nextLine());
                 if (value < minValue || value > maxValue) {
-                    System.out.println("Invalid input! Please enter an number between " + minValue + " and " + maxValue + ".");
+                    System.err.println("Invalid input! Please enter an number between " + minValue + " and " + maxValue + ".");
                 } else {
                     break;
                 }
             } catch (NumberFormatException e) {
-                System.out.println("Invalid input! Please enter a valid number.");
+                System.err.println("Invalid input! Please enter a valid number.");
             }
         }
         return value;
@@ -371,12 +373,12 @@ public class ChrisAirlines {
             try {
                 value = Integer.parseInt(scanner.nextLine());
                 if (value < 0) {
-                    System.out.println("Value cannot be negative. Please enter a valid integer.");
+                    System.err.println("Value cannot be negative. Please enter a valid integer.");
                 } else {
                     break;
                 }
             } catch (NumberFormatException e) {
-                System.out.println("Invalid input! Please enter a valid integer.");
+                System.err.println("Invalid input! Please enter a valid integer.");
             }
         }
         return value;
@@ -389,12 +391,12 @@ public class ChrisAirlines {
             try {
                 value = Double.parseDouble(scanner.nextLine());
                 if (value < 0) {
-                    System.out.println("Value cannot be negative. Please enter a valid number.");
+                    System.err.println("Value cannot be negative. Please enter a valid number.");
                 } else {
                     break;
                 }
             } catch (NumberFormatException e) {
-                System.out.println("Invalid input! Please enter a valid number.");
+                System.err.println("Invalid input! Please enter a valid number.");
             }
         }
         return value;
@@ -408,7 +410,7 @@ public class ChrisAirlines {
             if (confirmation.equals("Y") || confirmation.equals("N")) {
                 break;
             } else {
-                System.out.println("Invalid input! Please enter 'Y' for Yes or 'N' for No.");
+                System.err.println("Invalid input! Please enter 'Y' for Yes or 'N' for No.");
             }
         }
         return confirmation;
@@ -429,7 +431,7 @@ public class ChrisAirlines {
             name = scanner.nextLine();
             Matcher matcher = namePattern.matcher(name);
             if (!matcher.matches() || name.isEmpty()) {
-                System.out.println("Invalid name. Only alphabets and spaces are allowed. Please enter a valid name.");
+                System.err.println("Invalid name. Only alphabets and spaces are allowed. Please enter a valid name.");
             }
         } while (!namePattern.matcher(name).matches() || name.isEmpty());
 
@@ -440,7 +442,7 @@ public class ChrisAirlines {
             email = scanner.nextLine();
             Matcher matcher = emailPattern.matcher(email);
             if (!matcher.matches()) {
-                System.out.println("Invalid email format. Please enter a valid email.");
+                System.err.println("Invalid email format. Please enter a valid email.");
             }
         } while (!emailPattern.matcher(email).matches());
 
@@ -451,7 +453,7 @@ public class ChrisAirlines {
             phone = scanner.nextLine();
             Matcher matcher = phonePattern.matcher(phone);
             if (!matcher.matches()) {
-                System.out.println("Invalid phone number format. Please enter a valid phone number (e.g.1234567890).");
+                System.err.println("Invalid phone number format. Please enter a valid phone number (e.g.1234567890).");
             }
         } while (!phonePattern.matcher(phone).matches());
 
@@ -547,7 +549,7 @@ public class ChrisAirlines {
             } else if ("0".equals(flightCode)) {
                 break;
             } else {
-                System.out.println("Invalid flight code! Please select a flight code from the available flights.");
+                System.err.println("Invalid flight code! Please select a flight code from the available flights.");
             }
         }
         return flightCode;
@@ -572,7 +574,7 @@ public class ChrisAirlines {
             if (isValid) {
                 break;
             } else {
-                System.out.println("Invalid voucher ID! Please select a voucher ID from the available vouchers.");
+                System.err.println("Invalid voucher ID! Please select a voucher ID from the available vouchers.");
             }
         }
         return selectedVoucherId;
@@ -597,7 +599,7 @@ public class ChrisAirlines {
             if (isValid) {
                 break;
             } else {
-                System.out.println("Invalid voucher code! Please select a voucher code from the available vouchers.");
+                System.err.println("Invalid voucher code! Please select a voucher code from the available vouchers.");
             }
         }
         return selectedVoucherCode;
@@ -715,19 +717,19 @@ public class ChrisAirlines {
 
         for (LoyaltyTier tier : loyaltyTiers) {
             if ("Bronze Tier".equals(tier.getTierName())) {
-                System.out.println(Reset + BrightYellow + tier.getTierName() + Reset + displayRequiredPoints(tier));
+                System.out.println(Reset + BrightWhiteBgLight + BrightYellow + tier.getTierName() + Reset + displayRequiredPoints(tier));
                 displayPerks(tier);
                 System.out.println("");
             } else if ("Silver Tier".equals(tier.getTierName())) {
-                System.out.println(Reset + Silver + tier.getTierName() + Reset + displayRequiredPoints(tier));
+                System.out.println(Reset + BrightWhiteBgLight + Silver + tier.getTierName() + Reset + displayRequiredPoints(tier));
                 displayPerks(tier);
                 System.out.println("");
             } else if ("Gold Tier".equals(tier.getTierName())) {
-                System.out.println(Reset + Yellow + tier.getTierName() + Reset + displayRequiredPoints(tier));
+                System.out.println(Reset + BrightWhiteBgLight + Yellow + tier.getTierName() + Reset + displayRequiredPoints(tier));
                 displayPerks(tier);
                 System.out.println("");
             } else if ("Platinum Tier".equals(tier.getTierName())) {
-                System.out.println(Reset + BrightBlue + tier.getTierName() + Reset + displayRequiredPoints(tier));
+                System.out.println(Reset + BrightWhiteBgLight + BrightBlue + tier.getTierName() + Reset + displayRequiredPoints(tier));
                 displayPerks(tier);
                 System.out.println("");
             } else {
@@ -778,7 +780,7 @@ public class ChrisAirlines {
             if (redeemedVoucher.getStatus().equals("Used")) {
 
             } else if (redeemedVoucher.getExpiryDateTime().isBefore(LocalDateTime.now())) {
-                redeemedVoucher.setStatus("Expired");
+                redeemedVoucher.setStatus(BrightRed2 + "Expired");
             }
         }
         return redeemedVouchers;
