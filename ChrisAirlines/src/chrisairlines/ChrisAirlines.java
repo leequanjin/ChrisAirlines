@@ -759,6 +759,12 @@ public class ChrisAirlines {
         System.out.println("If the qualification criteria is not met in the following year, the Loyalty Tier will be downgraded based on their accumulated Loyalty Points.");
         System.out.println("Loyalty Points will revert back to " + BrightRed + "zero" + Reset + " after the qualification period regardless of what Loyalty Tier the user has achieved.");
 
+        System.out.println(BrightWhiteBg + "Vouchers and Their Usage" + Reset);
+        System.out.println("Vouchers are split into 3 types, which is the Flat Discount Amount Voucher, Percentage Discount Rate Voucher and Additional Rewards or Services Voucher.");
+        System.out.println("Vouchers can be redeemed with mileage points if sufficient.");
+        System.out.println("If the vouchers does not have enought stock, the voucher will be locked out of redemption.");
+        System.out.println("Vouchers will " + BrightRed + "expire after 1 month of redemption" + Reset + " and cannot be used thereafter.");
+
     }
 
     private static void displayPerks(LoyaltyTier loyaltyTier) {
