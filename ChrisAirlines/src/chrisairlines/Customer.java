@@ -261,8 +261,8 @@ public class Customer {
         }
     }
 
-    public void yearlyLoyaltyPointReset() {
-        if (LocalDateTime.now().getMonthValue() == 5 && LocalDateTime.now().getDayOfMonth() == 14) {
+    public void yearlyLoyaltyPointReset() { //Change month and day to get system turnover
+        if (LocalDateTime.now().getMonthValue() == 1 && LocalDateTime.now().getDayOfMonth() == 1) {
             setprevLoyaltyPoints(getnewLoyaltyPoints());
             setnewLoyaltyPoints(0);
         }
