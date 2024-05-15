@@ -1,6 +1,7 @@
 package chrisairlines;
 
 public class Flight {
+
     private String flightCode;
     private double fare;
     private String origin;
@@ -16,7 +17,7 @@ public class Flight {
         this.departureTime = departureTime;
         this.arrivalTime = arrivalTime;
     }
-    
+
     // <editor-fold desc="getters & setters">
     public String getFlightCode() {
         return flightCode;
@@ -72,5 +73,4 @@ public class Flight {
         return flightCode + "," + fare + "," + origin + "," + destination + "," + departureTime + "," + arrivalTime;
     }
 
-    
 }

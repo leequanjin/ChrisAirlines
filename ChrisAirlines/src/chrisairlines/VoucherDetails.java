@@ -3,6 +3,7 @@ package chrisairlines;
 import java.time.LocalDateTime;
 
 public class VoucherDetails {
+
     private String id;
     private String customerId;
     private Voucher voucher;
@@ -12,7 +13,7 @@ public class VoucherDetails {
     private double discountAmount;
     private double discountRate;
     private String reward;
-    
+
     public VoucherDetails(String id, String customerId, Voucher voucher, LocalDateTime redeemedDateTime, double discountAmount, double discountRate, String reward) {
         this.id = id;
         this.customerId = customerId;
@@ -24,7 +25,7 @@ public class VoucherDetails {
         this.discountRate = discountRate;
         this.reward = reward;
     }
-    
+
     //used by loadRedeemedVouchersByCustomerID from DatabaseHandler class
     public VoucherDetails(String id, String customerId, Voucher voucher, LocalDateTime redeemedDateTime, LocalDateTime exipryDateTime, String status, double discountAmount, double discountRate, String reward) {
         this.id = id;
@@ -45,7 +46,7 @@ public class VoucherDetails {
     public void setId(String id) {
         this.id = id;
     }
-    
+
     public Voucher getVoucher() {
         return voucher;
     }
@@ -109,19 +110,19 @@ public class VoucherDetails {
     public void setReward(String reward) {
         this.reward = reward;
     }
-    
+
     @Override
     public String toString() {
-        return id + "," +
-                customerId + "," +
-                voucher.getCode() + "," +
-                voucher.getType() + "," +
-                voucher.getDescription() + "," +
-                redeemedDateTime.toString() + "," +
-                expiryDateTime.toString() + "," +
-                status + "," +
-                discountAmount + "," +
-                discountRate + "," +
-                reward;
+        return id + ","
+                + customerId + ","
+                + voucher.getCode() + ","
+                + voucher.getType() + ","
+                + voucher.getDescription() + ","
+                + redeemedDateTime.toString() + ","
+                + expiryDateTime.toString() + ","
+                + status + ","
+                + discountAmount + ","
+                + discountRate + ","
+                + reward;
     }
 }

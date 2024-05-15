@@ -3,6 +3,7 @@ package chrisairlines;
 import java.util.HashMap;
 
 public class Booking {
+
     private HashMap<String, Flight> availableFlights;
 
     public Booking() {

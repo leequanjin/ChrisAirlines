@@ -1,16 +1,17 @@
 package chrisairlines;
 
 public abstract class Voucher {
+
     private String code;
     private String type;
     private String description;
     private int pointsRequired;
     private int stock;
-    
-    public Voucher(){
-        
+
+    public Voucher() {
+
     }
-    
+
     public Voucher(String code, String type, String description, int pointsRequired, int stock) {
         this.code = code;
         this.type = type;
@@ -18,13 +19,13 @@ public abstract class Voucher {
         this.pointsRequired = pointsRequired;
         this.stock = stock;
     }
-    
+
     public Voucher(String code, String type, String description) {
         this.code = code;
         this.type = type;
         this.description = description;
     }
-    
+
     public String getCode() {
         return code;
     }
@@ -55,7 +56,7 @@ public abstract class Voucher {
 
     public void setPointsRequired(int pointsRequired) {
         this.pointsRequired = pointsRequired;
-    } 
+    }
 
     public int getStock() {
         return stock;

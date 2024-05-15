@@ -3,6 +3,7 @@ package chrisairlines;
 import java.time.LocalDateTime;
 
 public class BookingDetails {
+
     private Flight flight;
     private int quantity;
     private double totalAmount;
@@ -49,7 +50,7 @@ public class BookingDetails {
 
     public void setBookingDateTime(LocalDateTime bookingDateTime) {
         this.bookingDateTime = bookingDateTime;
-    }  
+    }
 
     public double getDiscount() {
         return discount;

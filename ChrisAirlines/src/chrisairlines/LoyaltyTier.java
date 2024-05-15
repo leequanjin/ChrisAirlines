@@ -3,6 +3,7 @@ package chrisairlines;
 import java.util.ArrayList;
 
 public abstract class LoyaltyTier {
+
     private String tierName;
     private int minPoints;
     private int maxPoints;

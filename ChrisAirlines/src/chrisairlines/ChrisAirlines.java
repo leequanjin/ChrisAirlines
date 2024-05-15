@@ -11,31 +11,18 @@ import java.util.regex.Pattern;
 public class ChrisAirlines {
 
     //Colours
-    static String Black = "\u001b[30m";
     static String Red = "\u001b[31m";
-    //static String Green = "\u001b[32;2m";
     static String Yellow = "\u001b[33m";
-    //static String Blue = "\u001b[34m";
-    //static String Magenta = "\u001b[35m";
-    static String Cyan = "\u001b[36m";
-    //static String CyanBg = "\u001b[46m";
-    //static String White = "\u001b[37;3m";
     static String Silver = "\u001b[37;2m";
-    //static String BrightBlack = "\u001b[30;3m";
     static String BrightRed = "\u001b[31;1m";
     static String BrightRed2 = "\u001b[31;2m";
-    //static String BrightGreen = "\u001b[32;2m";
     static String BrightYellow = "\u001b[33;2m";
     static String BrightBlue = "\u001b[34;1m";
-    //static String BrightMagenta = "\u001b[35;1m";
     static String BrightCyan = "\u001b[36;2m";
-    //static String BrightWhite = "\u001b[37;1m";
     static String BrightWhiteBg = "\u001b[47;2m";
     static String BrightWhiteBgLight = "\u001b[47;3m";
     static String Reset = "\u001b[0m";
 
-    //Example use case
-    //System.out.println(Black + "Black Text" + Reset);
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -733,9 +720,6 @@ public class ChrisAirlines {
             } else {
                 System.err.println("ERROR!");
             }
-//            System.out.println(tier.getTierName() + displayRequiredPoints(tier));
-//            displayPerks(tier);
-//            System.out.println("");
         }
     }
 

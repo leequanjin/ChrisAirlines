@@ -39,7 +39,7 @@ public class DatabaseHandler {
             System.err.println("Error writing to file: " + e.getMessage());
         }
     }
-    
+
     // used to append new booking details object and associated customer id to booked_flights txt file
     public static void saveBookingDetailToFile(String customerId, BookingDetails bookingDetails) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("booked_flights.txt", true))) {
@@ -118,7 +118,7 @@ public class DatabaseHandler {
         }
         writeVouchersToFile(filename, vouchers);
     }
-    
+
     // used to modify a single redeemed voucher record in the redeemed_vouchers txt file
     public static void updateRedeemedVouchers(String filename, VoucherDetails redeemedVoucher) {
         List<VoucherDetails> redeemedVouchers = readRedeemedVouchersFromFile(filename);
@@ -217,47 +217,47 @@ public class DatabaseHandler {
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
                 String voucherType = parts[3];
-                    switch (voucherType) {
-                        case "Flat Discount Amount Voucher" -> {
-                            VoucherDetails voucherDetails = new VoucherDetails(
-                            parts[0], parts[1],
-                            new DiscountAmtVoucher(parts[2], parts[3], parts[4], Double.parseDouble(parts[8])),
-                            LocalDateTime.parse(parts[5]),
-                            LocalDateTime.parse(parts[6]),
-                            parts[7], Double.parseDouble(parts[8]), Double.parseDouble(parts[9]), parts[10]
-                            );
-                            redeemedVouchers.add(voucherDetails);
-                        }
-                        case "Percentage Discount Rate Voucher" -> {
-                            VoucherDetails voucherDetails = new VoucherDetails(
-                            parts[0], parts[1],
-                            new DiscountRateVoucher(parts[2], parts[3], parts[4], Double.parseDouble(parts[9])),
-                            LocalDateTime.parse(parts[5]),
-                            LocalDateTime.parse(parts[6]),
-                            parts[7], Double.parseDouble(parts[8]), Double.parseDouble(parts[9]), parts[10]
-                            );
-                            redeemedVouchers.add(voucherDetails);
-                        }
-                        case "Additional Rewards or Services Voucher" -> {
-                            VoucherDetails voucherDetails = new VoucherDetails(
-                            parts[0], parts[1],
-                            new RewardVoucher(parts[2], parts[3], parts[4], parts[10]),
-                            LocalDateTime.parse(parts[5]),
-                            LocalDateTime.parse(parts[6]),
-                            parts[7], Double.parseDouble(parts[8]), Double.parseDouble(parts[9]), parts[10]
-                            );
-                            redeemedVouchers.add(voucherDetails);
-                        }
-                        default -> {
-                        }
+                switch (voucherType) {
+                    case "Flat Discount Amount Voucher" -> {
+                        VoucherDetails voucherDetails = new VoucherDetails(
+                                parts[0], parts[1],
+                                new DiscountAmtVoucher(parts[2], parts[3], parts[4], Double.parseDouble(parts[8])),
+                                LocalDateTime.parse(parts[5]),
+                                LocalDateTime.parse(parts[6]),
+                                parts[7], Double.parseDouble(parts[8]), Double.parseDouble(parts[9]), parts[10]
+                        );
+                        redeemedVouchers.add(voucherDetails);
                     }
+                    case "Percentage Discount Rate Voucher" -> {
+                        VoucherDetails voucherDetails = new VoucherDetails(
+                                parts[0], parts[1],
+                                new DiscountRateVoucher(parts[2], parts[3], parts[4], Double.parseDouble(parts[9])),
+                                LocalDateTime.parse(parts[5]),
+                                LocalDateTime.parse(parts[6]),
+                                parts[7], Double.parseDouble(parts[8]), Double.parseDouble(parts[9]), parts[10]
+                        );
+                        redeemedVouchers.add(voucherDetails);
+                    }
+                    case "Additional Rewards or Services Voucher" -> {
+                        VoucherDetails voucherDetails = new VoucherDetails(
+                                parts[0], parts[1],
+                                new RewardVoucher(parts[2], parts[3], parts[4], parts[10]),
+                                LocalDateTime.parse(parts[5]),
+                                LocalDateTime.parse(parts[6]),
+                                parts[7], Double.parseDouble(parts[8]), Double.parseDouble(parts[9]), parts[10]
+                        );
+                        redeemedVouchers.add(voucherDetails);
+                    }
+                    default -> {
+                    }
+                }
             }
         } catch (IOException e) {
             System.err.println("Error reading file: " + e.getMessage());
         }
         return redeemedVouchers;
     }
-    
+
     // used to rewrite all contents into customer_details txt file after modifying customers array list
     public static void writeCustomersToFile(String filename, List<Customer> customers) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
@@ -268,7 +268,7 @@ public class DatabaseHandler {
             System.err.println("Error writing to file: " + e.getMessage());
         }
     }
-    
+
     // used to rewrite all contents into voucher_details txt file after modifying vouchers array list
     public static void writeVouchersToFile(String filename, List<Voucher> vouchers) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
@@ -279,7 +279,7 @@ public class DatabaseHandler {
             System.err.println("Error writing to file: " + e.getMessage());
         }
     }
-    
+
     // used to rewrite all contents into voucher_details txt file after modifying vouchers array list
     public static void writeRedeemedVouchersToFile(String filename, List<VoucherDetails> redeemedVouchers) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
@@ -303,31 +303,31 @@ public class DatabaseHandler {
                     switch (voucherType) {
                         case "Flat Discount Amount Voucher" -> {
                             VoucherDetails voucherDetails = new VoucherDetails(
-                            parts[0], parts[1],
-                            new DiscountAmtVoucher(parts[2], parts[3], parts[4], Double.parseDouble(parts[8])),
-                            LocalDateTime.parse(parts[5]),
-                            LocalDateTime.parse(parts[6]),
-                            parts[7], Double.parseDouble(parts[8]), Double.parseDouble(parts[9]), parts[10]
+                                    parts[0], parts[1],
+                                    new DiscountAmtVoucher(parts[2], parts[3], parts[4], Double.parseDouble(parts[8])),
+                                    LocalDateTime.parse(parts[5]),
+                                    LocalDateTime.parse(parts[6]),
+                                    parts[7], Double.parseDouble(parts[8]), Double.parseDouble(parts[9]), parts[10]
                             );
                             redeemedVouchers.add(voucherDetails);
                         }
                         case "Percentage Discount Rate Voucher" -> {
                             VoucherDetails voucherDetails = new VoucherDetails(
-                            parts[0], parts[1],
-                            new DiscountRateVoucher(parts[2], parts[3], parts[4], Double.parseDouble(parts[9])),
-                            LocalDateTime.parse(parts[5]),
-                            LocalDateTime.parse(parts[6]),
-                            parts[7], Double.parseDouble(parts[8]), Double.parseDouble(parts[9]), parts[10]
+                                    parts[0], parts[1],
+                                    new DiscountRateVoucher(parts[2], parts[3], parts[4], Double.parseDouble(parts[9])),
+                                    LocalDateTime.parse(parts[5]),
+                                    LocalDateTime.parse(parts[6]),
+                                    parts[7], Double.parseDouble(parts[8]), Double.parseDouble(parts[9]), parts[10]
                             );
                             redeemedVouchers.add(voucherDetails);
                         }
                         case "Additional Rewards or Services Voucher" -> {
                             VoucherDetails voucherDetails = new VoucherDetails(
-                            parts[0], parts[1],
-                            new RewardVoucher(parts[2], parts[3], parts[4], parts[10]),
-                            LocalDateTime.parse(parts[5]),
-                            LocalDateTime.parse(parts[6]),
-                            parts[7], Double.parseDouble(parts[8]), Double.parseDouble(parts[9]), parts[10]
+                                    parts[0], parts[1],
+                                    new RewardVoucher(parts[2], parts[3], parts[4], parts[10]),
+                                    LocalDateTime.parse(parts[5]),
+                                    LocalDateTime.parse(parts[6]),
+                                    parts[7], Double.parseDouble(parts[8]), Double.parseDouble(parts[9]), parts[10]
                             );
                             redeemedVouchers.add(voucherDetails);
                         }
@@ -341,7 +341,7 @@ public class DatabaseHandler {
         }
         return redeemedVouchers;
     }
-    
+
     // used to load all booking details objects associated with a cusstomer ID  from booking_details txt and store in an arraylist for data modification
     public static List<BookingDetails> loadBookingsByCustomerId(String customerId, String filename) {
         List<BookingDetails> bookedFlights = new ArrayList<>();
@@ -350,14 +350,14 @@ public class DatabaseHandler {
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
                 if (parts[0].equals(customerId)) {
-                    Flight flight = new Flight(parts[1], 
-                            Double.parseDouble(parts[2]), 
+                    Flight flight = new Flight(parts[1],
+                            Double.parseDouble(parts[2]),
                             parts[3], parts[4], parts[5], parts[6]);
-                    BookingDetails bookedFlight = new BookingDetails(flight, 
-                            Integer.parseInt(parts[7]), 
-                            Double.parseDouble(parts[8]), 
-                            LocalDateTime.parse(parts[9]), 
-                            Double.parseDouble(parts[10]), 
+                    BookingDetails bookedFlight = new BookingDetails(flight,
+                            Integer.parseInt(parts[7]),
+                            Double.parseDouble(parts[8]),
+                            LocalDateTime.parse(parts[9]),
+                            Double.parseDouble(parts[10]),
                             parts[11]);
                     bookedFlights.add(bookedFlight);
                 }
