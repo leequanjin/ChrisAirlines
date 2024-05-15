@@ -194,9 +194,7 @@ public class ChrisAirlines {
                                     DatabaseHandler.updateRedeemedVouchers("redeemed_vouchers.txt", redeemedVoucher);
 
                                     break;
-                                } else {
-                                    System.err.println("Invalid voucher");
-                                }
+                                } 
                             }
 
                         } else {
